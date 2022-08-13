@@ -1,15 +1,16 @@
 {
   "name": "chess-tools",
-  "version": "0.3.0",
-  "description": "A collection of tools / libraries for programming chess applications.",
+  "version": "0.1.0",
+  "description": "Chess opening book reader.",
   "scripts": {
     "main": "index.js",
     "test": "mocha --timeout 60000 test/*"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/johnfontaine/chess-tools.git"
+    "url": "git+https://github.com/gmcheems/chess-tools.git"
   },
+  "browserslist": "> 0.25%, not dead",
   "keywords": [
     "chess",
     "polyglot",
@@ -25,29 +26,24 @@
     "winboard",
     "chessbase"
   ],
-  "author": [
-    {
-      "name": "John Fontaine",
-      "email": "jsfontaine@gmail.com",
-      "url": "https://www.johnfontaine.com/"
-    }
-  ],
+  "author": "GM Cheems <gmcheems@proton.me>",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/johnfontaine/chess-tools/issues"
+    "url": "https://github.com/gmcheems/chess-tools/issues"
   },
-  "homepage": "https://github.com/johnfontaine/chess-tools#readme",
+  "homepage": "https://github.com/gmcheems/chess-tools#readme",
   "devDependencies": {
+    "@babel/eslint-parser": "^7.18.9",
+    "@babel/preset-env": "^7.18.10",
+    "eslint": "^8.21.0",
+    "eslint-plugin-import": "^2.26.0",
     "mocha": "^3.5.3",
+    "prettier": "^2.7.1",
     "should": "^13.2.1"
   },
   "dependencies": {
-    "chess.js": "^0.10.2",
-    "debug": "^3.0.1",
-    "int64-buffer": "^0.1.9",
-    "js-string-compression": "^1.0.1",
-    "lichess-api": "^1.0.2",
-    "request": "^2.85.0",
-    "request-promise": "^4.2.2"
+    "chess.js": "^0.13.4",
+    "int64-buffer": "1.0.0",
+    "js-string-compression": "^1.0.1"
   }
 }
