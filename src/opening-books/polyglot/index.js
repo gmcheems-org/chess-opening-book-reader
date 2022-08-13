@@ -1,6 +1,6 @@
 import int64Buffer from 'int64-buffer'
 
-import EventEmitter from 'node:events'
+import EventEmitter from 'events'
 import { Chess } from 'chess.js'
 import { Transform } from 'node:stream'
 import utils from '../../utils.js'

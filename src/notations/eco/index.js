@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import EventEmitter from 'node:events'
+import EventEmitter from 'events'
 import Opening from './entry.js'
 import { Transform } from 'node:stream'
 

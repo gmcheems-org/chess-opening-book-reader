@@ -4,7 +4,7 @@ import CTGEntry from './entry.js'
 //Based on notes  from http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
 import { Transform } from 'node:stream'
 
-import EventEmitter from 'node:events'
+import EventEmitter from 'events'
 import { Chess } from 'chess.js'
 const chess = new Chess()
 const chess_black = new Chess()

@@ -21,6 +21,7 @@ module.exports = {
     'import/extensions': ['error', 'ignorePackages'],
 
     'unicorn/prefer-spread': 'off',
+    'unicorn/prefer-node-protocol': 'off',
   },
   overrides: [
     {

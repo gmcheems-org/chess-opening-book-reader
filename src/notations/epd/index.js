@@ -1,4 +1,4 @@
-import EventEmitter from 'node:events'
+import EventEmitter from 'events'
 import EPDEntry from './entry.js'
 import { Transform } from 'node:stream'
 import utils from '../../utils.js'
