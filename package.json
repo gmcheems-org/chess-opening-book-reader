@@ -1,7 +1,7 @@
 {
-  "name": "chess-tools",
+  "name": "chess-opening-book-reader",
   "version": "0.1.0",
-  "description": "Chess opening book reader.",
+  "description": "Chess opening book reader",
   "type": "module",
   "scripts": {
     "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gmcheems/chess-tools.git"
+    "url": "git+https://github.com/gmcheems/chess-opening-book-reader.git"
   },
   "browserslist": "> 0.25%, not dead",
   "keywords": [
@@ -28,11 +28,18 @@
     "chessbase"
   ],
   "author": "GM Cheems <gmcheems@proton.me>",
+  "contributors": [
+    {
+      "name": "John Fontaine",
+      "email": "jsfontaine@gmail.com",
+      "url": "https://www.johnfontaine.com/"
+    }
+  ],
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/gmcheems/chess-tools/issues"
+    "url": "https://github.com/gmcheems/chess-opening-book-reader/issues"
   },
-  "homepage": "https://github.com/gmcheems/chess-tools#readme",
+  "homepage": "https://github.com/gmcheems/chess-opening-book-reader#readme",
   "devDependencies": {
     "@babel/eslint-parser": "^7.18.9",
     "@babel/preset-env": "^7.18.10",
