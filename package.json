@@ -2,6 +2,7 @@
   "name": "chess-tools",
   "version": "0.1.0",
   "description": "Chess opening book reader.",
+  "type": "module",
   "scripts": {
     "main": "index.js",
     "test": "mocha --timeout 60000 test/*"

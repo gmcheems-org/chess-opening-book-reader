@@ -1,6 +1,6 @@
-import ECO from './eco'
-import EPD from './epd'
-import PGN from './pgn'
+import ECO from './eco/index.js'
+import EPD from './epd/index.js'
+import PGN from './pgn/index.js'
 
 export default {
   ECO,

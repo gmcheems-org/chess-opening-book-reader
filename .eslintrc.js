@@ -15,6 +15,9 @@ module.exports = {
     'no-var': 'error',
     'import/no-unresolved': 'error',
     'import/no-commonjs': 'error',
+    // Node.js modules don't allow directory imports, so need to
+    // add '/index.js' at the end of each import
+    'import/extensions': ['error', 'ignorePackages'],
   },
   overrides: [
     {
