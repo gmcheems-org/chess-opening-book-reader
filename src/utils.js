@@ -1,19 +1,8 @@
-import jsscompress from 'js-string-compression'
-const hm = new jsscompress.Hauffman()
-
 /*
   FEN is <RANK>/(x8)<SPACE><TO_MOVE><SPACE><CASTLING><SPACE><ENPASS><SPACE><HALFMOVE_CLOCK><SPACE><MOVE_NUMBER>(with each rank A-H with a peice. or skips.)
 */
 export const key_from_fen = function (fen) {
   return fen.split(' ').slice(0, 4).join(' ') //strip move number and halfmove from it.
-}
-
-export const compress_fen = function (fen) {
-  return hm.compress(fen)
-}
-
-export const uncompress_fen = function (compressed_fen) {
-  return hm.decompress(compressed_fen)
 }
 
 const FEN_ITEMS = ['ranks', 'to_move', 'castling', 'en_pass']
@@ -26,13 +15,15 @@ export const flip_board = function (fen) {
     .map((value, index) => {
       data[FEN_ITEMS[index]] = value
     })
-  data.to_move = data.to_move === 'w' ? 'b' : 'w';
+  data.to_move = data.to_move === 'w' ? 'b' : 'w'
   let ranks = []
   let x = 7
   for (let rank of data.ranks.split('/')) {
     let row = ''
     for (let item of rank.split('')) {
-      row = board.MIRROR_PEICE[item] ? row + board.MIRROR_PEICE[item] : row + String(item);
+      row = board.MIRROR_PEICE[item]
+        ? row + board.MIRROR_PEICE[item]
+        : row + String(item)
     }
     ranks[x] = row
     x--
@@ -40,7 +31,9 @@ export const flip_board = function (fen) {
   data.ranks = ranks.join('/')
   let en_pass = '-'
   if (data.en_pass !== '-') {
-    en_pass = data.en_pass.includes('3') ? data.en_pass.replace('3', '6') : data.en_pass.replace('6', '3');
+    en_pass = data.en_pass.includes('3')
+      ? data.en_pass.replace('3', '6')
+      : data.en_pass.replace('6', '3')
   }
   data.en_pass = en_pass
   let castling = '-'
