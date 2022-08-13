@@ -1,6 +1,9 @@
 import Polyglot from '../src/opening-books/polyglot/index.js'
-import fs from 'fs'
-import assert from 'assert'
+import fs from 'node:fs'
+import assert from 'node:assert'
+import path from 'node:path'
+import { fileURLToPath } from 'url'
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const test_data = {
   'starting position': {
@@ -24,7 +27,7 @@ describe('Polyglot', function () {
       done()
     })
     polyglot.load_book(
-      fs.createReadStream(process.cwd() + '/test/sample-data/gm2001.bin'),
+      fs.createReadStream(__dirname + '/sample-data/gm2001.bin'),
     )
   })
   describe('check loaded', function () {

@@ -1,7 +1,10 @@
 import ChessTools from '../index.js'
 import fs from 'node:fs'
 import assert from 'node:assert'
+import path from 'node:path'
+import { fileURLToPath } from 'url'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 let test_fen = ['3r1rk1/1p3pnp/p3pBp1/1qPpP3/1P1P2R1/P2Q3R/6PP/6K1 w - - ']
 
 describe('EPD', function () {
@@ -11,7 +14,7 @@ describe('EPD', function () {
       done()
     })
     epd.load_stream(
-      fs.createReadStream(process.cwd() + '/test/sample-data/epd-test.epd'),
+      fs.createReadStream(__dirname + '/sample-data/epd-test.epd'),
     )
   })
   describe('check loaded', function () {
