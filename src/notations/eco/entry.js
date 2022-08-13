@@ -9,7 +9,7 @@ export default class Opening {
   }
 
   toChess() {
-    let pgn_short = this.pgn.substring(0, this.pgn.length - 2)
+    let pgn_short = this.pgn.slice(0, Math.max(0, this.pgn.length - 2))
     let chess = new Chess()
     chess.load_pgn(pgn_short)
     return chess

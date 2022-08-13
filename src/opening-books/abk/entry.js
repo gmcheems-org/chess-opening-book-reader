@@ -3,9 +3,9 @@ import utils from '../../utils.js'
 const files = utils.board.FILES
 import { Chess } from 'chess.js'
 function decode_move(pos) {
-  let file_num = pos % 8
-  let rank = parseInt(pos / 8) + 1
-  return files[file_num] + '' + rank
+  let file_number = pos % 8
+  let rank = Number.parseInt(pos / 8) + 1
+  return files[file_number] + '' + rank
 }
 function decode_promotion(promotion) {
   if (!promotion) {

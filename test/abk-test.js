@@ -1,6 +1,6 @@
 import ChessTools from '../index.js'
-import fs from 'fs'
-import assert from 'assert'
+import fs from 'node:fs'
+import assert from 'node:assert'
 
 let test_fen = ['rnbqk2r/ppppppbp/5np1/8/2P5/2N3P1/PP1PPP1P/R1BQKBNR w KQkq']
 
@@ -26,7 +26,7 @@ describe('ABK', function () {
     for (let fen of test_fen) {
       it(fen + ' has data', function () {
         let r = abk.find(fen)
-        // console.log(JSON.stringify(r.book_moves,null, ' '));
+        // console.log(JSON.stringify(r.book_moves,undefined, ' '));
         assert.notEqual(typeof r, 'undefined')
       })
     }

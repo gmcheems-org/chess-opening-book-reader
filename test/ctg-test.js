@@ -1,6 +1,6 @@
 import CTG from '../src/opening-books/ctg/index.js'
-import fs from 'fs'
-import assert from 'assert'
+import fs from 'node:fs'
+import assert from 'node:assert'
 const test_fen = [
   'rnbqkbnr/pppp1ppp/8/4p3/8/8/PPPPPPPP/RNBQKBNR w KQkq',
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq',
@@ -29,7 +29,7 @@ describe('CTG', function () {
     for (let fen of test_fen) {
       it(fen + ' has data', function () {
         let r = ctg.find(fen)
-        // console.log(JSON.stringify(r.book_moves,null, ' '));
+        // console.log(JSON.stringify(r.book_moves,undefined, ' '));
         assert.notEqual(typeof r, 'undefined')
       })
     }

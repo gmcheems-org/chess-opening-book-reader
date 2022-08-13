@@ -1,8 +1,8 @@
 //see https://chessprogramming.wikispaces.com/ABK
 //http://www.talkchess.com/forum/viewtopic.php?topic_view=threads&p=184321&t=20661
 import utils from '../../utils.js'
-import { Transform } from 'stream'
-import EventEmitter from 'events'
+import { Transform } from 'node:stream'
+import EventEmitter from 'node:events'
 // import { Chess } from "chess.js";
 
 // let chess = new Chess();
@@ -29,11 +29,7 @@ class ABKStream extends Transform {
   }
   _transform(chunk, encoding, callback) {
     this.received_bytes += chunk.length
-    if (this._data) {
-      this._data = Buffer.concat([this._data, chunk])
-    } else {
-      this._data = chunk
-    }
+    this._data = this._data ? Buffer.concat([this._data, chunk]) : chunk;
     if (this.received_bytes > this.start + ENTRY_SIZE) {
       this.read_to_start = true
     }

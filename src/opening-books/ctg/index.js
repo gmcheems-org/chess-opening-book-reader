@@ -2,9 +2,9 @@ import utils from '../../utils.js'
 import CTGEntry from './entry.js'
 
 //Based on notes  from http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
-import { Transform } from 'stream'
+import { Transform } from 'node:stream'
 
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 import { Chess } from 'chess.js'
 const chess = new Chess()
 const chess_black = new Chess()
@@ -34,11 +34,7 @@ class CTGStream extends Transform {
     callback()
   }
   _transform(chunk, encoding, callback) {
-    if (this._data) {
-      this._data = Buffer.concat(this._data, chunk)
-    } else {
-      this._data = chunk
-    }
+    this._data = this._data ? Buffer.concat(this._data, chunk) : chunk
     let dataview = new DataView(this._data.buffer)
     if (this.page === -1) {
       if (
@@ -58,7 +54,7 @@ class CTGStream extends Transform {
     }
     if (this.page > -1 && this._data.length >= 4096) {
       //we have pages.
-      let num_pages = parseInt(this._data.length / 4096)
+      let number_pages = Number.parseInt(this._data.length / 4096)
       //  console.log("Got " + num_pages + " pages", this._data.length );
       let remainder = this._data.length % 4096
       //  console.log("remainder length is", remainder);
@@ -71,16 +67,16 @@ class CTGStream extends Transform {
           ),
         )
       }
-      for (let page_num = 0; page_num < num_pages; page_num++) {
-        this.process_page(page_num, dataview)
+      for (let page_number = 0; page_number < number_pages; page_number++) {
+        this.process_page(page_number, dataview)
       }
       this._data = extra_data
     }
     callback()
   }
-  process_page(page_num, dataView) {
+  process_page(page_number, dataView) {
     this.page++
-    let page_start = page_num * 4096
+    let page_start = page_number * 4096
     let number_of_positions = dataView.getUint16(page_start)
     let bytes_in_page = dataView.getUint16(page_start + 2)
     // console.log("Page Start", page_start, page_start + bytes_in_page)
@@ -132,14 +128,14 @@ class CTGStream extends Transform {
     let position_buffer = page.slice(p1, p2)
     let position_view = new Uint8Array(position_buffer)
     let binary_string = ''
-    position_view.forEach((element) => {
+    for (const element of position_view) {
       binary_string += utils.pad_number_string(element.toString(2), 8)
-    })
+    }
     entry.encoded_position = binary_string
     entry_black.encoded_position = binary_string
     let board = []
     let board_black = []
-    let str_position = 0
+    let string_position = 0
     let max = 6
     let rank = 0
     let file = 0
@@ -151,10 +147,10 @@ class CTGStream extends Transform {
       board_position < 64;
       board_position++
     ) {
-      for (let str_len = 1; str_len <= max; str_len++) {
+      for (let string_length = 1; string_length <= max; string_length++) {
         let eval_string = binary_string.substring(
-          str_position,
-          str_position + str_len,
+          string_position,
+          string_position + string_length,
         )
         for (let peice_code of Object.keys(peice_encoding)) {
           if (String(eval_string) === String(peice_code)) {
@@ -169,12 +165,12 @@ class CTGStream extends Transform {
               peice_encoding[String(peice_code)].txt !== ' '
             ) {
               chess.put(peice_encoding[String(peice_code)], algebraic_position)
-              if (peice_encoding_black[String(peice_code)].txt == 'K') {
-                if (black_position.match(/[abcd]\d/)) {
-                  if (!entry.has_castling) {
-                    black_is_mirrored = true
-                  }
-                }
+              if (
+                peice_encoding_black[String(peice_code)].txt == 'K' &&
+                /[a-d]\d/.test(black_position) &&
+                !entry.has_castling
+              ) {
+                black_is_mirrored = true
               }
               chess_black.put(
                 peice_encoding_black[String(peice_code)],
@@ -190,8 +186,8 @@ class CTGStream extends Transform {
               peice: peice_encoding_black[String(peice_code)],
               position: black_position,
             }
-            str_position += String(peice_code).length
-            str_len = 1
+            string_position += String(peice_code).length
+            string_length = 1
             rank++
             continue POSITION_LOOP
           }
@@ -201,19 +197,19 @@ class CTGStream extends Transform {
     if (black_is_mirrored) {
       entry_black.is_mirrored = true
       chess_black.clear()
-      let tmp_board_black = []
+      let temporary_board_black = []
       entry_black.has_castling = 0
       for (let position of board_black) {
         let pos_elements = position.position.split('')
         pos_elements[0] = mirror_file[pos_elements[0]]
         position.position = pos_elements.join('')
         let updated = board_index[position.position]
-        tmp_board_black[updated] = position
+        temporary_board_black[updated] = position
         if (position.peice.txt != ' ') {
           chess_black.put(position.peice, position.position)
         }
       }
-      board_black = tmp_board_black
+      board_black = temporary_board_black
     }
 
     entry.board = board
@@ -259,41 +255,41 @@ class CTGStream extends Transform {
       entry_black.book_moves.push(move_and_analysis_black)
     }
     this.record_start += book_moves_size
-    let num_games = read_24(pageView, this.record_start)
-    entry.total_games = num_games
+    let number_games = read_24(pageView, this.record_start)
+    entry.total_games = number_games
     this.record_start += 3
-    let num_white_wins = read_24(pageView, this.record_start)
-    entry.white_wins = num_white_wins
-    entry_black.black_wins = num_white_wins
+    let number_white_wins = read_24(pageView, this.record_start)
+    entry.white_wins = number_white_wins
+    entry_black.black_wins = number_white_wins
     this.record_start += 3
-    let num_black_wins = read_24(pageView, this.record_start)
-    entry.black_wins = num_black_wins
-    entry_black.white_wins = num_black_wins
+    let number_black_wins = read_24(pageView, this.record_start)
+    entry.black_wins = number_black_wins
+    entry_black.white_wins = number_black_wins
     this.record_start += 3
-    let num_draws = read_24(pageView, this.record_start)
-    entry.draws = num_draws
+    let number_draws = read_24(pageView, this.record_start)
+    entry.draws = number_draws
     entry_black.draws = entry.draws
     this.record_start += 3
     let unkown_integer = pageView.getUint32(this.record_start)
     entry.unknown1 = unkown_integer
     this.record_start += 4
-    let rating1_num_games = read_24(pageView, this.record_start)
+    let rating1_number_games = read_24(pageView, this.record_start)
     this.record_start += 3
     let rating1_rating_total = pageView.getUint32(this.record_start)
-    let rating1_rating = rating1_rating_total / rating1_num_games
+    let rating1_rating = rating1_rating_total / rating1_number_games
     entry.ratings.push({
-      games: rating1_num_games,
+      games: rating1_number_games,
       rating: rating1_rating,
       total_ratings: rating1_rating_total,
     })
     this.record_start += 4
-    let rating2_num_games = read_24(pageView, this.record_start)
+    let rating2_number_games = read_24(pageView, this.record_start)
     this.record_start += 3
     let rating2_rating_total = pageView.getUint32(this.record_start)
     this.record_start += 4
-    let rating2_rating = rating2_rating_total / rating2_num_games
+    let rating2_rating = rating2_rating_total / rating2_number_games
     entry.ratings.push({
-      games: rating2_num_games,
+      games: rating2_number_games,
       rating: rating2_rating,
       total_ratings: rating2_rating_total,
     })
@@ -332,7 +328,7 @@ class CTG extends EventEmitter {
     this.stream.on('data', (entry) => {
       if (this.entries[entry.to_move][entry.key]) {
         console.log('possible duplicate for entry')
-        console.log('New Entry:', JSON.stringify(entry, null, ' '))
+        console.log('New Entry:', JSON.stringify(entry, undefined, ' '))
         console.log(
           'OLD ENTRY:',
           JSON.stringify(this.entries[entry.to_move][entry.key]),
@@ -367,6 +363,5 @@ function read_24(dataview, start) {
   let byte1 = dataview.getUint8(start)
   let byte2 = dataview.getUint8(start + 2)
   let byte3 = dataview.getUint8(start + 4)
-  let res = (byte1 << 16) + (byte2 << 8) + byte3
-  return res
+  return (byte1 << 16) + (byte2 << 8) + byte3
 }

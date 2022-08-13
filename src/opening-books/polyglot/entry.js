@@ -62,7 +62,7 @@ class PolyglotEntry {
     }
   }
   toString() {
-    return JSON.stringify(this, null, ' ')
+    return JSON.stringify(this, undefined, ' ')
   }
 }
 export default PolyglotEntry

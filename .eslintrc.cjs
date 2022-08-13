@@ -2,11 +2,12 @@ module.exports = {
   parser: '@babel/eslint-parser',
   parserOptions: {
     requireConfigFile: false,
+    sourceType: 'module',
     babelOptions: {
       presets: ['@babel/preset-env'],
     },
   },
-  extends: ['eslint:recommended'],
+  extends: ['eslint:recommended', 'plugin:unicorn/recommended'],
   plugins: ['import'],
   env: {
     'shared-node-browser': true,
@@ -18,6 +19,8 @@ module.exports = {
     // Node.js modules don't allow directory imports, so need to
     // add '/index.js' at the end of each import
     'import/extensions': ['error', 'ignorePackages'],
+
+    'unicorn/prefer-spread': 'off',
   },
   overrides: [
     {

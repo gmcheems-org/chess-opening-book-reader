@@ -1,8 +1,8 @@
 import int64Buffer from 'int64-buffer'
 
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 import { Chess } from 'chess.js'
-import { Transform } from 'stream'
+import { Transform } from 'node:stream'
 import utils from '../../utils.js'
 
 const files = utils.board.FILES
@@ -13,6 +13,7 @@ import {
   RandomCastle,
   RandomEnPassant,
   RandomTurn,
+  pieceTypes,
 } from './encoding.js'
 
 import PolyglotEntry from './entry.js'
@@ -25,14 +26,10 @@ class PolyglotStream extends Transform {
   //   callback();
   // }
   _transform(chunk, encoding, callback) {
-    if (this._data) {
-      this._data = Buffer.concat(this._data, chunk)
-    } else {
-      this._data = chunk
-    }
+    this._data = this._data ? Buffer.concat(this._data, chunk) : chunk
     // let entries = [];
     if (this._data.length >= 16) {
-      let i = 16
+      let index = 16
       let remainder = this._data.length % 16
       let extra_data
       if (remainder > 0) {
@@ -44,8 +41,8 @@ class PolyglotStream extends Transform {
           ),
         )
       }
-      for (i = 16; i < this._data.length; i = i + 16) {
-        let b = this._data.buffer.slice(i - 16, i)
+      for (index = 16; index < this._data.length; index = index + 16) {
+        let b = this._data.buffer.slice(index - 16, index)
         let entry = PolyglotEntry.fromBuffer(b)
         this.push(entry)
       }
@@ -129,16 +126,16 @@ function hash(fen) {
   let castlingOffsets = []
   let fenTokens = game.fen().split(' ')
   let castlingField = fenTokens[2]
-  if (castlingField.indexOf('K') != -1) {
+  if (castlingField.includes('K')) {
     castlingOffsets.push(0)
   }
-  if (castlingField.indexOf('Q') != -1) {
+  if (castlingField.includes('Q')) {
     castlingOffsets.push(1)
   }
-  if (castlingField.indexOf('k') != -1) {
+  if (castlingField.includes('k')) {
     castlingOffsets.push(2)
   }
-  if (castlingField.indexOf('q') != -1) {
+  if (castlingField.includes('q')) {
     castlingOffsets.push(3)
   }
   //Calculate enpassant offsets

@@ -1,6 +1,6 @@
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 import EPDEntry from './entry.js'
-import { Transform } from 'stream'
+import { Transform } from 'node:stream'
 import utils from '../../utils.js'
 
 class EPDStream extends Transform {
@@ -25,8 +25,8 @@ class EPDStream extends Transform {
     callback()
   }
   _make_records_from_lines() {
-    let len = this._lines.length
-    for (let i = 0; i < len; i++) {
+    let length = this._lines.length
+    for (let index = 0; index < length; index++) {
       let line = this._lines.shift()
       if (line) {
         let entry = EPDEntry.fromLine(line)

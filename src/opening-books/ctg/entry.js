@@ -9,11 +9,7 @@ import {
 import utils from '../../utils.js'
 class CTGEntry {
   constructor(to_move) {
-    if (!to_move) {
-      this.to_move = 'w'
-    } else {
-      this.to_move = to_move
-    }
+    this.to_move = to_move || 'w'
     this.book_moves = []
     this.ratings = []
     this.total_games = 0
@@ -64,7 +60,7 @@ class CTGEntry {
     throw new Error('PGN not available')
   }
   toString() {
-    return JSON.stringify(this, null, '')
+    return JSON.stringify(this, undefined, '')
   }
 }
 export default CTGEntry

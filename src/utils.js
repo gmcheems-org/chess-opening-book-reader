@@ -26,21 +26,13 @@ export const flip_board = function (fen) {
     .map((value, index) => {
       data[FEN_ITEMS[index]] = value
     })
-  if (data.to_move === 'w') {
-    data.to_move = 'b'
-  } else {
-    data.to_move = 'w'
-  }
+  data.to_move = data.to_move === 'w' ? 'b' : 'w';
   let ranks = []
   let x = 7
   for (let rank of data.ranks.split('/')) {
     let row = ''
     for (let item of rank.split('')) {
-      if (board.MIRROR_PEICE[item]) {
-        row = row + board.MIRROR_PEICE[item]
-      } else {
-        row = row + String(item)
-      }
+      row = board.MIRROR_PEICE[item] ? row + board.MIRROR_PEICE[item] : row + String(item);
     }
     ranks[x] = row
     x--
@@ -48,11 +40,7 @@ export const flip_board = function (fen) {
   data.ranks = ranks.join('/')
   let en_pass = '-'
   if (data.en_pass !== '-') {
-    if (data.en_pass.includes('3')) {
-      en_pass = data.en_pass.replace('3', '6')
-    } else {
-      en_pass = data.en_pass.replace('6', '3')
-    }
+    en_pass = data.en_pass.includes('3') ? data.en_pass.replace('3', '6') : data.en_pass.replace('6', '3');
   }
   data.en_pass = en_pass
   let castling = '-'
@@ -65,24 +53,24 @@ export const flip_board = function (fen) {
   )
 }
 
-export const pad_number_string = function (str, expected_length) {
-  if (str.length < expected_length) {
-    let pad = expected_length - str.length
+export const pad_number_string = function (string_, expected_length) {
+  if (string_.length < expected_length) {
+    let pad = expected_length - string_.length
     for (let x = 0; x < pad; x++) {
-      str = '0' + str
+      string_ = '0' + string_
     }
   }
-  return str
+  return string_
 }
 
 export const debug_buffer_to_string = function (buffer) {
   let array = new Uint8Array(buffer)
   process.stdout.write('\nSTART_BUFFER_DUMP\n')
-  for (let i = 0; i < array.length; i++) {
-    if (i % 32 == 0) {
+  for (const [index, element] of array.entries()) {
+    if (index % 32 == 0) {
       process.stdout.write('\n')
     }
-    process.stdout.write(to_hex_string(array[i]) + ' ')
+    process.stdout.write(to_hex_string(element) + ' ')
   }
   process.stdout.write('\nEND_BUFFER_DUMP\n')
 }
@@ -91,8 +79,8 @@ function to_hex_string(number) {
   return '0x' + pad_number_string(number.toString(16), 2)
 }
 export const board = {}
-board.FILES = 'abcdefgh'.split('')
-board.RANKS = '12345678'.split('')
+board.FILES = [...'abcdefgh']
+board.RANKS = [...'12345678']
 board.BOARD_INDEX = {
   a1: 0,
   a2: 1,

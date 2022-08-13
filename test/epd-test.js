@@ -1,6 +1,6 @@
 import ChessTools from '../index.js'
-import fs from 'fs'
-import assert from 'assert'
+import fs from 'node:fs'
+import assert from 'node:assert'
 
 let test_fen = ['3r1rk1/1p3pnp/p3pBp1/1qPpP3/1P1P2R1/P2Q3R/6PP/6K1 w - - ']
 
@@ -26,7 +26,7 @@ describe('EPD', function () {
     for (let fen of test_fen) {
       it(fen + ' has data', function () {
         let r = epd.find(fen)
-        // console.log(JSON.stringify(r.book_moves,null, ' '));
+        // console.log(JSON.stringify(r.book_moves,undefined, ' '));
         assert.notEqual(typeof r, 'undefined')
       })
     }

@@ -16,8 +16,8 @@ function algebraic_position_to_xy(algebraic) {
     }
   }
   return {
-    x: parseInt(x),
-    y: parseInt(file_and_rank[1]) - 1,
+    x: Number.parseInt(x),
+    y: Number.parseInt(file_and_rank[1]) - 1,
   }
 }
 function xy_to_algebraic_notation(xy) {
@@ -43,30 +43,36 @@ class CTGMoveService {
       let peice_number = move.peice.match(/([A-Za-z]+) (\d)/)
       if (peice_number) {
         let peice_short = peices[peice_number[1]]
-        let peice_num = peice_number[2]
+        let peice_number_ = peice_number[2]
         let pn = 1
-        let i = 0
+        let index = 0
         for (let position of board) {
           //
           if (!position || !position.peice) {
-            console.log('BOARD ERROR', is_black, is_mirrored, i, board.length)
-            console.log(JSON.stringify(board, null, ' '))
+            console.log(
+              'BOARD ERROR',
+              is_black,
+              is_mirrored,
+              index,
+              board.length,
+            )
+            console.log(JSON.stringify(board, undefined, ' '))
             process.exit()
           }
           if (position.peice.txt === peice_short) {
-            if (pn == peice_num) {
+            if (pn == peice_number_) {
               start_position = position.position
               let move_info = move.move.match(/(\w)(\d) ?(\w?)(\d?)/)
               if (move_info) {
-                let x_dir = 1
-                let y_dir = 1
+                let x_direction = 1
+                let y_direction = 1
                 let x = 0
                 let y = 0
                 if (move_info[1] === 'b') {
-                  y_dir = is_black ? 1 : -1
+                  y_direction = is_black ? 1 : -1
                 }
                 if (move_info[1] === 'r' || move_info[3] === 'r') {
-                  x_dir = is_black && !is_mirrored ? 1 : -1
+                  x_direction = is_black && !is_mirrored ? 1 : -1
                 }
                 if (move_info[1] === 'b' || move_info[1] === 'f') {
                   y = move_info[2]
@@ -76,8 +82,8 @@ class CTGMoveService {
                 if (move_info[3]) {
                   x = move_info[4]
                 }
-                x = x * x_dir
-                y = y * y_dir
+                x = x * x_direction
+                y = y * y_direction
                 let xy = algebraic_position_to_xy(start_position)
                 xy.y = xy.y + y
                 xy.x = xy.x + x
@@ -90,7 +96,7 @@ class CTGMoveService {
               pn++
             }
           }
-          i++
+          index++
         }
       }
     }

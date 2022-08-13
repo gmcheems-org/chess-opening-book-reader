@@ -1,16 +1,11 @@
-import fs from 'fs'
-import EventEmitter from 'events'
+import fs from 'node:fs'
+import EventEmitter from 'node:events'
 import Opening from './entry.js'
-import { Transform } from 'stream'
+import { Transform } from 'node:stream'
 
 function extract_value(text) {
   let match = text.match(/"(.+)"/)
-  if (match) {
-    // console.log("match", match[1]);
-    return match[1]
-  } else {
-    return ''
-  }
+  return match ? match[1] : ''
 }
 
 class ECOStream extends Transform {
@@ -42,8 +37,8 @@ class ECOStream extends Transform {
     callback()
   }
   _make_records_from_lines() {
-    let len = this._lines.length
-    for (let i = 0; i < len; i++) {
+    let length = this._lines.length
+    for (let index = 0; index < length; index++) {
       let line = this._lines.shift()
       if (line.startsWith('{')) {
         this.in_comment = true
@@ -105,13 +100,12 @@ class Eco extends EventEmitter {
     }
     let best_match
     for (let record of this.entries) {
-      let r_pgn = record.pgn.substring(0, record.pgn.indexOf('*'))
+      let r_pgn = record.pgn.slice(0, Math.max(0, record.pgn.indexOf('*')))
       if (pgn.includes(r_pgn)) {
-        if (best_match && record.pgn.length > best_match.pgn.length) {
-          best_match = record
-        } else {
-          best_match = record
-        }
+        best_match =
+          best_match && record.pgn.length > best_match.pgn.length
+            ? record
+            : record
       }
     }
     return best_match

@@ -4,19 +4,15 @@ import { Chess } from 'chess.js'
 See https://chessprogramming.wikispaces.com/Extended+Position+Description
 */
 function getIntValue(value) {
-  return parseInt(value.trim())
+  return Number.parseInt(value.trim())
 }
 function getMoves(value) {
   let moves = []
   let vs = value.split(' ')
   for (let v of vs) {
     if (v) {
-      if (
-        v === 'O-O-O' ||
-        v === 'O-O' ||
-        v.match(/[abcdefghrbknqpx1-8]+[+?!]*/i)
-      ) {
-        if (v.match(/[^RBKNQPabcdefghrbknqpx1-8+?!]/)) {
+      if (v === 'O-O-O' || v === 'O-O' || /[1-8a-hknp-rx]+[!+?]*/i.test(v)) {
+        if (/[^!+1-8?BKNP-Ra-hknp-rx]/.test(v)) {
           //this is not a move skip it.
         } else {
           moves.push(v)
@@ -86,9 +82,9 @@ class EPDEntry {
       let value = em[2]
       if (command === 'id') {
         position.id = getText(value)
-      } else if (command.match(/c\d/)) {
-        let num = parseInt(command.substring(1, command.length))
-        position.comments[num] = getText(value)
+      } else if (/c\d/.test(command)) {
+        let number_ = Number.parseInt(command.slice(1, command.length))
+        position.comments[number_] = getText(value)
       } else if (OPCODES[command]) {
         position.operations[command] = OPCODES[command](value)
       } else {
