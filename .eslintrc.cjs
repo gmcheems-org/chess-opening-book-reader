@@ -28,6 +28,7 @@ module.exports = {
       files: ['test/**/*.js'],
       env: {
         mocha: true,
+        node: true,
       },
     },
   ],

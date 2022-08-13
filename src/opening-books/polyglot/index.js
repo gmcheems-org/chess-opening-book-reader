@@ -1,8 +1,7 @@
-import int64Buffer from 'int64-buffer'
-
-import EventEmitter from 'events'
 import { Chess } from 'chess.js'
-import { Transform } from 'node:stream'
+import int64Buffer from 'int64-buffer'
+import EventEmitter from 'events'
+
 import utils from '../../utils.js'
 
 const files = utils.board.FILES
@@ -17,82 +16,8 @@ import {
 } from './encoding.js'
 
 import PolyglotEntry from './entry.js'
-class PolyglotStream extends Transform {
-  constructor() {
-    super({ readableObjectMode: true })
-  }
-  // _flush(callback) {
-  //   console.log("flush");
-  //   callback();
-  // }
-  _transform(chunk, encoding, callback) {
-    this._data = this._data ? Buffer.concat(this._data, chunk) : chunk
-    // let entries = [];
-    if (this._data.length >= 16) {
-      let index = 16
-      let remainder = this._data.length % 16
-      let extra_data
-      if (remainder > 0) {
-        //take the last bit of the buffer and save it.
-        extra_data = Buffer.from(
-          this._data.buffer.slice(
-            this._data.length - remainder,
-            this._data.length,
-          ),
-        )
-      }
-      for (index = 16; index < this._data.length; index = index + 16) {
-        let b = this._data.buffer.slice(index - 16, index)
-        let entry = PolyglotEntry.fromBuffer(b)
-        this.push(entry)
-      }
-      this._data = extra_data
-    }
-    //this.push(entries);
-    callback()
-  }
-}
-class Polyglot extends EventEmitter {
-  constructor() {
-    super()
-    this.loaded = false
-    this.entries = []
-    this.stream = new PolyglotStream()
-  }
-  load_book(stream) {
-    this.entries = []
-    this.loaded = false
 
-    this.stream.on('data', (entry) => {
-      if (!this.entries[entry.key]) {
-        this.entries[entry.key] = []
-      }
-      this.entries[entry.key].push(entry)
-    })
-    this.stream.on('finish', () => {
-      this.loaded = true
-      this.emit('loaded')
-    })
-    this.stream.on('error', (error) => {
-      console.log('error', error)
-      this.emit('error', error)
-    })
-    stream.pipe(this.stream)
-  }
-  find(fen) {
-    if (!this.loaded) {
-      throw new Error('No book is loaded')
-    }
-    let hash = this.generate_hash(fen)
-    return this.entries[hash]
-  }
-  generate_hash(fen) {
-    /**From the polyglot module **/
-    return hash(fen)
-  }
-}
 function xor_64uint(a, b) {
-  let output
   let a_view = new DataView(a.toArrayBuffer())
   let b_view = new DataView(b.toArrayBuffer())
   let a_32_hi = a_view.getUint32(0, false)
@@ -188,6 +113,55 @@ function hash(fen) {
   }
   return output
 }
-Polyglot.PolyglotStream = PolyglotStream
-Polyglot.PolyglotEntry = PolyglotEntry
-export default Polyglot
+
+class PolyglotParser extends EventEmitter {
+  constructor() {
+    super()
+    this.data = undefined
+  }
+
+  parse(buffer) {
+    for (let index = 16; index < buffer.length; index = index + 16) {
+      let b = buffer.buffer.slice(index - 16, index)
+      let entry = PolyglotEntry.fromBuffer(b)
+      this.emit('data', entry)
+    }
+    this.emit('finish')
+  }
+}
+
+export default class Polyglot extends EventEmitter {
+  constructor() {
+    super()
+    this.loaded = false
+    this.entries = []
+  }
+
+  load_book(buffer) {
+    const parser = new PolyglotParser()
+    parser.on('data', (entry) => {
+      if (!this.entries[entry.key]) {
+        this.entries[entry.key] = []
+      }
+      this.entries[entry.key].push(entry)
+    })
+    parser.on('finish', () => {
+      this.loaded = true
+      this.emit('loaded')
+    })
+    parser.parse(buffer)
+  }
+
+  find(fen) {
+    if (!this.loaded) {
+      throw new Error('No book is loaded')
+    }
+    let hash = this.generate_hash(fen)
+    return this.entries[hash]
+  }
+
+  generate_hash(fen) {
+    /**From the polyglot module **/
+    return hash(fen)
+  }
+}
