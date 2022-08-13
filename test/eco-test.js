@@ -14,7 +14,7 @@ describe('ECO', function () {
     eco.on('loaded', () => {
       done()
     })
-    eco.load_stream(fs.createReadStream(__dirname + '/eco.pgn'))
+    eco.load_stream(fs.createReadStream(__dirname + '/sample-data/eco.pgn'))
   })
   describe('check loaded', function () {
     it('loaded is true', function () {
