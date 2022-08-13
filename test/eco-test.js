@@ -1,5 +1,11 @@
+import fs from 'node:fs'
+import assert from 'node:assert'
+import path from 'node:path'
+import { fileURLToPath } from 'url'
+
 import { ECO } from '../index.js'
-import assert from 'assert'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 describe('ECO', function () {
   let eco
@@ -8,7 +14,7 @@ describe('ECO', function () {
     eco.on('loaded', () => {
       done()
     })
-    eco.load_default()
+    eco.load_stream(fs.createReadStream(__dirname + '/eco.pgn'))
   })
   describe('check loaded', function () {
     it('loaded is true', function () {

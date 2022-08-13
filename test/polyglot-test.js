@@ -1,6 +1,7 @@
 import Polyglot from '../src/opening-books/polyglot/index.js'
 import fs from 'fs'
 import assert from 'assert'
+
 const test_data = {
   'starting position': {
     FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -31,7 +32,7 @@ describe('Polyglot', function () {
       assert.equal(polyglot.loaded, true)
     })
     it('has entries', function () {
-      assert.equal(Object.keys(polyglot.entries).length, 23807)
+      assert.equal(Object.keys(polyglot.entries).length, 23_807)
     })
   })
   describe('test hashes', function () {

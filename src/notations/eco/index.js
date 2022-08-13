@@ -1,4 +1,3 @@
-import fs from 'node:fs'
 import EventEmitter from 'events'
 import Opening from './entry.js'
 import { Transform } from 'node:stream'
@@ -90,9 +89,6 @@ class Eco extends EventEmitter {
       this.entries.push(entry)
     })
     stream.pipe(this.stream)
-  }
-  load_default() {
-    this.load_stream(fs.createReadStream(__dirname + '/eco.pgn'))
   }
   find(pgn) {
     if (!this.loaded) {
