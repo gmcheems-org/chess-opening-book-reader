@@ -57,7 +57,7 @@ class CTGMoveService {
               board.length,
             )
             console.log(JSON.stringify(board, undefined, ' '))
-            process.exit()
+            throw new Error('Board error')
           }
           if (position.peice.txt === peice_short) {
             if (pn == peice_number_) {

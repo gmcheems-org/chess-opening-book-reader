@@ -7,6 +7,8 @@ function decode_move(pos) {
   let rank = Number.parseInt(pos / 8) + 1
   return files[file_number] + '' + rank
 }
+
+// eslint-disable-next-line no-unused-vars
 function decode_promotion(promotion) {
   if (!promotion) {
     return ''

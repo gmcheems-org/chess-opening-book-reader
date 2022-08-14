@@ -41,18 +41,19 @@ class CTGParser extends EventEmitter {
   }
 
   parse(buffer) {
-    let remainder = buffer.length % 4096
-    if (remainder > 0 && buffer.length < 4096) {
+    let remainder = buffer.byteLength % 4096
+    if (remainder > 0 && buffer.byteLength < 4096) {
       throw new Error('Invalid CTG File (file not a factor of 4096)')
     }
 
-    // let dataview = new DataView(buffer.buffer)
+    // let dataview = new DataView(buffer)
     // let number_of_games = dataview.getUint32(28)
 
     // Discard first 4096 bytes as it only contains metadata
-    const newBuffer = Buffer.from(buffer.buffer.slice(4096, buffer.length))
-    let dataview = new DataView(newBuffer.buffer)
-    let number_pages = Number.parseInt(newBuffer.length / 4096)
+    const newBuffer = buffer.slice(4096, buffer.length)
+
+    let dataview = new DataView(newBuffer)
+    let number_pages = Number.parseInt(newBuffer.byteLength / 4096)
 
     for (let page_number = 0; page_number < number_pages; page_number++) {
       this.process_page(newBuffer, page_number, dataview)
@@ -66,7 +67,7 @@ class CTGParser extends EventEmitter {
     let number_of_positions = dataView.getUint16(page_start)
     let bytes_in_page = dataView.getUint16(page_start + 2)
     // console.log("Page Start", page_start, page_start + bytes_in_page)
-    let page = buffer.buffer.slice(page_start, page_start + bytes_in_page)
+    let page = buffer.slice(page_start, page_start + bytes_in_page)
     let pageView = new DataView(page)
     // console.log("Page Len", page);
     // console.log("page", page_number, "number_of_positions", number_of_positions);
@@ -92,7 +93,7 @@ class CTGParser extends EventEmitter {
     entry_black.pos = pos
     this.last_record_start = this.record_start
     let header_byte = pageView.getUint8(this.record_start)
-    let position_length = header_byte & 0x1f
+    let position_length = header_byte & 0x1F
     let en_passant = header_byte & 0x20
     let castling = header_byte & 0x40
 

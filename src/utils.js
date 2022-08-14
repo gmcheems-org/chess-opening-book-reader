@@ -1,11 +1,11 @@
+const FEN_ITEMS = ['ranks', 'to_move', 'castling', 'en_pass']
+
 /*
   FEN is <RANK>/(x8)<SPACE><TO_MOVE><SPACE><CASTLING><SPACE><ENPASS><SPACE><HALFMOVE_CLOCK><SPACE><MOVE_NUMBER>(with each rank A-H with a peice. or skips.)
 */
 export const key_from_fen = function (fen) {
   return fen.split(' ').slice(0, 4).join(' ') //strip move number and halfmove from it.
 }
-
-const FEN_ITEMS = ['ranks', 'to_move', 'castling', 'en_pass']
 
 export const flip_board = function (fen) {
   let data = {}
@@ -58,19 +58,20 @@ export const pad_number_string = function (string_, expected_length) {
 
 export const debug_buffer_to_string = function (buffer) {
   let array = new Uint8Array(buffer)
-  process.stdout.write('\nSTART_BUFFER_DUMP\n')
+  console.log('\nSTART_BUFFER_DUMP\n')
   for (const [index, element] of array.entries()) {
     if (index % 32 == 0) {
-      process.stdout.write('\n')
+      console.log('\n')
     }
-    process.stdout.write(to_hex_string(element) + ' ')
+    console.log(to_hex_string(element) + ' ')
   }
-  process.stdout.write('\nEND_BUFFER_DUMP\n')
+  console.log('\nEND_BUFFER_DUMP\n')
 }
 
 function to_hex_string(number) {
   return '0x' + pad_number_string(number.toString(16), 2)
 }
+
 export const board = {}
 board.FILES = [...'abcdefgh']
 board.RANKS = [...'12345678']

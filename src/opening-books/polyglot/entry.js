@@ -1,32 +1,37 @@
 import { encode_move, decode_move } from './encoding.js'
 
 import pkg from 'int64-buffer'
+import { fen_hash } from './tools.js'
 const { Uint64BE } = pkg
 
 class PolyglotEntry {
   static fromBuffer(buffer) {
     let dataView = new DataView(buffer)
-    let e = new PolyglotEntry()
-    e._key = new Uint64BE(buffer.slice(0, 8)).toString(16)
-    if (e._key.length < 16) {
-      let pad = 16 - e._key.length
+    let entry = new PolyglotEntry()
+    entry._key = new Uint64BE(buffer.slice(0, 8)).toString(16)
+    if (entry._key.length < 16) {
+      let pad = 16 - entry._key.length
       for (let x = 0; x < pad; x++) {
-        e._key = '0' + e._key
+        entry._key = '0' + entry._key
       }
     }
-    e._encoded_move = dataView.getUint16(8, false)
-    e._algebraic_move = decode_move(dataView.getUint16(8, false))
-    e._weight = dataView.getUint16(10, false)
-    e._learn = dataView.getUint32(12, false)
-    return e
+    entry._encoded_move = dataView.getUint16(8, false)
+    entry._algebraic_move = decode_move(dataView.getUint16(8, false))
+    entry._weight = dataView.getUint16(10, false)
+    entry._learn = dataView.getUint32(12, false)
+    return entry
   }
+
   static withFEN(fen, algebraic_move, weight, learn) {
-    e._key = hash(fen)
-    e.algebraic_move = algebraic_move
-    e.weight = weight
-    e.learn = learn
+    let entry = new PolyglotEntry()
+    entry._key = fen_hash(fen)
+    entry.algebraic_move = algebraic_move
+    entry.weight = weight
+    entry.learn = learn
   }
+
   constructor() {}
+
   get key() {
     return this._key
   }

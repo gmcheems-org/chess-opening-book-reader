@@ -65,6 +65,6 @@ export const en_passant_encoding_black = [
 
 export const ep_mask = Number.parseInt('11100000', 2)
 export const castle_mask = Number.parseInt('00011110', 2)
-export const po = 0x1f
+export const po = 0x1F
 export const ep = 0x20
 export const ca = 0x40
