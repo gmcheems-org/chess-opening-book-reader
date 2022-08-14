@@ -2,8 +2,7 @@ import fs from 'node:fs'
 import assert from 'node:assert'
 import path from 'node:path'
 import { fileURLToPath } from 'url'
-
-import { ECO } from '../index.js'
+import ECO from '../src/opening-books/eco/index.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 

@@ -1,44 +1,32 @@
 import EventEmitter from 'events'
 import Opening from './entry.js'
-import { Transform } from 'node:stream'
 
 function extract_value(text) {
   let match = text.match(/"(.+)"/)
   return match ? match[1] : ''
 }
 
-class ECOStream extends Transform {
+class ECOParser extends EventEmitter {
   constructor() {
-    super({ readableObjectMode: true })
-    this._data = ''
-    this._lines = []
+    super()
     this.in_comment = false
     this.in_pgn = false
     this.in_record = false
     this.comment = ''
     this.current_record = false
   }
-  _flush(callback) {
-    this._make_records_from_lines()
-    callback()
-  }
-  _transform(chunk, encoding, callback) {
-    let data = chunk.toString()
+
+  parse(buffer) {
+    let data = buffer.toString()
     let lines = data.split(/\n/m)
-    if (this._lines.length > 0) {
-      console.log('append to last line')
-      this._lines[this.lines.length - 1] += lines.shift()
-    }
-    for (let line of lines) {
-      this._lines.push(line)
-    }
-    this._make_records_from_lines()
-    callback()
+    this.processLines(lines)
+    this.emit('finish')
   }
-  _make_records_from_lines() {
-    let length = this._lines.length
+
+  processLines(lines) {
+    let length = lines.length
     for (let index = 0; index < length; index++) {
-      let line = this._lines.shift()
+      let line = lines.shift()
       if (line.startsWith('{')) {
         this.in_comment = true
       }
@@ -52,7 +40,7 @@ class ECOStream extends Transform {
       if (line.startsWith('[ECO')) {
         if (this.current_record) {
           this.current_record.pgn = this.current_record.pgn.trim()
-          this.push(this.current_record)
+          this.emit('data', this.current_record)
         }
         this.current_record = new Opening()
         this.current_record.eco_code = extract_value(line)
@@ -72,23 +60,23 @@ class ECOStream extends Transform {
   }
 }
 
-class Eco extends EventEmitter {
+export default class Eco extends EventEmitter {
   constructor() {
     super()
     this.loaded = false
     this.comment = ''
     this.entries = []
-    this.stream = new ECOStream()
   }
-  load_stream(stream) {
-    this.stream.on('finish', () => {
+  load_book(buffer) {
+    const parser = new ECOParser()
+    parser.on('finish', () => {
       this.loaded = true
       this.emit('loaded')
     })
-    this.stream.on('data', (entry) => {
+    parser.on('data', (entry) => {
       this.entries.push(entry)
     })
-    stream.pipe(this.stream)
+    parser.parse(buffer)
   }
   find(pgn) {
     if (!this.loaded) {
@@ -107,5 +95,3 @@ class Eco extends EventEmitter {
     return best_match
   }
 }
-
-export default Eco
