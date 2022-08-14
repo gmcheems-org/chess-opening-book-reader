@@ -1,8 +1,12 @@
-//Based on notes  from http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
-import { Transform } from 'node:stream'
 import EventEmitter from 'events'
 import { Chess } from 'chess.js'
 
+import {
+  board,
+  pad_number_string,
+  debug_buffer_to_string,
+  key_from_fen,
+} from '../../utils.js'
 import {
   peice_encoding,
   peice_encoding_black,
@@ -10,12 +14,6 @@ import {
   ep_mask,
   castle_mask,
 } from './encoding.js'
-import {
-  board,
-  pad_number_string,
-  debug_buffer_to_string,
-  key_from_fen,
-} from '../../utils.js'
 import CTGMoveService from './moves.js'
 import CTGEntry from './entry.js'
 
@@ -35,6 +33,7 @@ function read_24(dataview, start) {
   return (byte1 << 16) + (byte2 << 8) + byte3
 }
 
+// Based on notes from http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
 class CTGParser extends EventEmitter {
   constructor() {
     super()
