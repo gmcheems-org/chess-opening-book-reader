@@ -1,20 +1,7 @@
-import utils from '../../utils.js'
-import CTGEntry from './entry.js'
-
 //Based on notes  from http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
 import { Transform } from 'node:stream'
-
 import EventEmitter from 'events'
 import { Chess } from 'chess.js'
-const chess = new Chess()
-const chess_black = new Chess()
-const files = utils.board.FILES
-const ranks = utils.board.RANKS
-const board_index = utils.board.BOARD_INDEX
-const flip_board = utils.board.FLIP_BOARD
-const mirror_file = utils.board.MIRROR_FILE
-import CTGMoveService from './moves.js'
-const moveService = new CTGMoveService()
 
 import {
   peice_encoding,
@@ -23,84 +10,85 @@ import {
   ep_mask,
   castle_mask,
 } from './encoding.js'
+import {
+  board,
+  pad_number_string,
+  debug_buffer_to_string,
+  key_from_fen,
+} from '../../utils.js'
+import CTGMoveService from './moves.js'
+import CTGEntry from './entry.js'
 
-class CTGStream extends Transform {
+const chess = new Chess()
+const chess_black = new Chess()
+const files = board.FILES
+const ranks = board.RANKS
+const board_index = board.BOARD_INDEX
+const flip_board = board.FLIP_BOARD
+const mirror_file = board.MIRROR_FILE
+const moveService = new CTGMoveService()
+
+function read_24(dataview, start) {
+  let byte1 = dataview.getUint8(start)
+  let byte2 = dataview.getUint8(start + 2)
+  let byte3 = dataview.getUint8(start + 4)
+  return (byte1 << 16) + (byte2 << 8) + byte3
+}
+
+class CTGParser extends EventEmitter {
   constructor() {
-    super({ readableObjectMode: true })
-    this.page = -1
-    this.entry_num = 0
+    super()
+    this.data = undefined
   }
-  _flush(callback) {
-    callback()
-  }
-  _transform(chunk, encoding, callback) {
-    this._data = this._data ? Buffer.concat(this._data, chunk) : chunk
-    let dataview = new DataView(this._data.buffer)
-    if (this.page === -1) {
-      if (
-        this._data.length > 32 &&
-        typeof this.number_of_games === 'undefined'
-      ) {
-        this.number_of_games = dataview.getUint32(28)
-        // console.log("Number of Games", this.number_of_games);
-      }
-      if (this._data.length >= 4096) {
-        this.page++
-        this._data = Buffer.from(
-          this._data.buffer.slice(4096, this._data.length),
-        )
-        dataview = new DataView(this._data.buffer)
-      }
+
+  parse(buffer) {
+    let remainder = buffer.length % 4096
+    if (remainder > 0 && buffer.length < 4096) {
+      throw new Error('Invalid CTG File (file not a factor of 4096)')
     }
-    if (this.page > -1 && this._data.length >= 4096) {
-      //we have pages.
-      let number_pages = Number.parseInt(this._data.length / 4096)
-      //  console.log("Got " + num_pages + " pages", this._data.length );
-      let remainder = this._data.length % 4096
-      //  console.log("remainder length is", remainder);
-      let extra_data
-      if (remainder > 0) {
-        extra_data = new Buffer(
-          this._data.buffer.slice(
-            this._data.buffer.length - remainder,
-            this._data.buffer.length,
-          ),
-        )
-      }
-      for (let page_number = 0; page_number < number_pages; page_number++) {
-        this.process_page(page_number, dataview)
-      }
-      this._data = extra_data
+
+    // let dataview = new DataView(buffer.buffer)
+    // let number_of_games = dataview.getUint32(28)
+
+    // Discard first 4096 bytes as it only contains metadata
+    const newBuffer = Buffer.from(buffer.buffer.slice(4096, buffer.length))
+    let dataview = new DataView(newBuffer.buffer)
+    let number_pages = Number.parseInt(newBuffer.length / 4096)
+
+    for (let page_number = 0; page_number < number_pages; page_number++) {
+      this.process_page(newBuffer, page_number, dataview)
     }
-    callback()
+
+    this.emit('finish')
   }
-  process_page(page_number, dataView) {
-    this.page++
+
+  process_page(buffer, page_number, dataView) {
     let page_start = page_number * 4096
     let number_of_positions = dataView.getUint16(page_start)
     let bytes_in_page = dataView.getUint16(page_start + 2)
     // console.log("Page Start", page_start, page_start + bytes_in_page)
-    let page = this._data.buffer.slice(page_start, page_start + bytes_in_page)
+    let page = buffer.buffer.slice(page_start, page_start + bytes_in_page)
     let pageView = new DataView(page)
     // console.log("Page Len", page);
-    // console.log("page", this.page, "number_of_positions", number_of_positions);
-    //  console.log("page", this.page, "bytes_in_page", bytes_in_page);
+    // console.log("page", page_number, "number_of_positions", number_of_positions);
+    //  console.log("page", page_number, "bytes_in_page", bytes_in_page);
     this.record_start = 4
     this.last_record_start = 4
     for (let pos = 0; pos < number_of_positions; pos++) {
-      this.process_entry(pos, page, pageView)
+      this.process_entry(pos, page_number, page, pageView)
     }
   }
-  process_entry(pos, page, pageView) {
+
+  process_entry(pos, page_number, page, pageView) {
     this.entry_num++
     let entry = new CTGEntry()
     let entry_black = new CTGEntry('b')
     entry.entry_num = this.entry_num
-    entry.page = this.page
+    entry.page = page_number
     entry.record_start = this.record_start
     entry.pos = pos
     entry_black.entry_num = this.entry_num
-    entry_black.page = this.page
+    entry_black.page = page_number
     entry_black.record_start = this.record_start
     entry_black.pos = pos
     this.last_record_start = this.record_start
@@ -108,14 +96,16 @@ class CTGStream extends Transform {
     let position_length = header_byte & 0x1f
     let en_passant = header_byte & 0x20
     let castling = header_byte & 0x40
+
+    // Could happen if loading wrong file type
     if (!header_byte) {
-      // console.log("INVALID HEADER BYTE WTF!!!", this.record_start);
-      utils.debug_buffer_to_string(
+      debug_buffer_to_string(
         page.slice(this.record_start - 3, this.record_start + 3),
       )
-      process.exit()
+      throw new Error('Invalid header byte')
     }
-    // console.log(utils.pad_number_string(header_byte.toString(2), 8));
+
+    // console.log(pad_number_string(header_byte.toString(2), 8));
     entry.position_length = position_length
     // console.log("POSITION LENGTH", position_length);
     entry.has_en_passant = en_passant
@@ -129,7 +119,7 @@ class CTGStream extends Transform {
     let position_view = new Uint8Array(position_buffer)
     let binary_string = ''
     for (const element of position_view) {
-      binary_string += utils.pad_number_string(element.toString(2), 8)
+      binary_string += pad_number_string(element.toString(2), 8)
     }
     entry.encoded_position = binary_string
     entry_black.encoded_position = binary_string
@@ -148,7 +138,7 @@ class CTGStream extends Transform {
       board_position++
     ) {
       for (let string_length = 1; string_length <= max; string_length++) {
-        let eval_string = binary_string.substring(
+        let eval_string = binary_string.slice(
           string_position,
           string_position + string_length,
         )
@@ -310,22 +300,24 @@ class CTGStream extends Transform {
     entry.record_offset = record_offset
     entry_black.record_offset = record_offset
     // console.log(entry.record_start, entry.record_offset);
-    this.push(entry)
-    this.push(entry_black)
+    this.emit('data', entry)
+    this.emit('data', entry_black)
   }
 }
-class CTG extends EventEmitter {
+
+export default class CTG extends EventEmitter {
   constructor() {
     super()
     this.loaded = false
-    this.stream = new CTGStream()
     this.entries = {
       b: {},
       w: {},
     }
   }
-  load_book(stream) {
-    this.stream.on('data', (entry) => {
+
+  load_book(buffer) {
+    const parser = new CTGParser()
+    parser.on('data', (entry) => {
       if (this.entries[entry.to_move][entry.key]) {
         console.log('possible duplicate for entry')
         console.log('New Entry:', JSON.stringify(entry, undefined, ' '))
@@ -336,32 +328,19 @@ class CTG extends EventEmitter {
       }
       this.entries[entry.to_move][entry.key] = entry
     })
-    this.stream.on('finish', () => {
+    parser.on('finish', () => {
       this.loaded = true
       this.emit('loaded')
     })
-    this.stream.on('error', (error) => {
-      console.log('error', error)
-      this.emit('error', error)
-    })
-    stream.pipe(this.stream)
+    parser.parse(buffer)
   }
+
   find(fen) {
     if (!this.loaded) {
       throw new Error('No book is loaded')
     }
     let to_move = fen.split(' ')[1]
-    let key = utils.key_from_fen(fen)
+    let key = key_from_fen(fen)
     return this.entries[to_move][key]
   }
-}
-export default CTG
-CTG.CTGStream = CTGStream
-CTG.CTGEntry = CTGEntry
-
-function read_24(dataview, start) {
-  let byte1 = dataview.getUint8(start)
-  let byte2 = dataview.getUint8(start + 2)
-  let byte3 = dataview.getUint8(start + 4)
-  return (byte1 << 16) + (byte2 << 8) + byte3
 }

@@ -1,36 +1,35 @@
-import { Chess } from 'chess.js'
-const chess = new Chess()
+import { PAWN, ROOK, BISHOP, KNIGHT, QUEEN, KING, WHITE, BLACK } from 'chess.js'
 
 export const peice_encoding = {
   0: { txt: ' ', type: undefined, color: undefined },
-  110: { txt: 'P', type: chess.PAWN, color: chess.WHITE },
-  10_110: { txt: 'R', type: chess.ROOK, color: chess.WHITE },
-  10_100: { txt: 'B', type: chess.BISHOP, color: chess.WHITE },
-  10_010: { txt: 'N', type: chess.KNIGHT, color: chess.WHITE },
-  100_010: { txt: 'Q', type: chess.QUEEN, color: chess.WHITE },
-  100_000: { txt: 'K', type: chess.KING, color: chess.WHITE },
-  111: { txt: 'p', type: chess.PAWN, color: chess.BLACK },
-  10_111: { txt: 'r', type: chess.ROOK, color: chess.BLACK },
-  10_101: { txt: 'b', type: chess.BISHOP, color: chess.BLACK },
-  10_011: { txt: 'n', type: chess.KNIGHT, color: chess.BLACK },
-  100_011: { txt: 'q', type: chess.QUEEN, color: chess.BLACK },
-  100_001: { txt: 'k', type: chess.KING, color: chess.BLACK },
+  110: { txt: 'P', type: PAWN, color: WHITE },
+  10_110: { txt: 'R', type: ROOK, color: WHITE },
+  10_100: { txt: 'B', type: BISHOP, color: WHITE },
+  10_010: { txt: 'N', type: KNIGHT, color: WHITE },
+  100_010: { txt: 'Q', type: QUEEN, color: WHITE },
+  100_000: { txt: 'K', type: KING, color: WHITE },
+  111: { txt: 'p', type: PAWN, color: BLACK },
+  10_111: { txt: 'r', type: ROOK, color: BLACK },
+  10_101: { txt: 'b', type: BISHOP, color: BLACK },
+  10_011: { txt: 'n', type: KNIGHT, color: BLACK },
+  100_011: { txt: 'q', type: QUEEN, color: BLACK },
+  100_001: { txt: 'k', type: KING, color: BLACK },
 }
 
 export const peice_encoding_black = {
   0: { txt: ' ', type: undefined, color: undefined },
-  110: { txt: 'p', type: chess.PAWN, color: chess.BLACK },
-  10_110: { txt: 'r', type: chess.ROOK, color: chess.BLACK },
-  10_100: { txt: 'b', type: chess.BISHOP, color: chess.BLACK },
-  10_010: { txt: 'n', type: chess.KNIGHT, color: chess.BLACK },
-  100_010: { txt: 'q', type: chess.QUEEN, color: chess.BLACK },
-  100_000: { txt: 'k', type: chess.KING, color: chess.BLACK },
-  111: { txt: 'P', type: chess.PAWN, color: chess.WHITE },
-  10_111: { txt: 'R', type: chess.ROOK, color: chess.WHITE },
-  10_101: { txt: 'B', type: chess.BISHOP, color: chess.WHITE },
-  10_011: { txt: 'N', type: chess.KNIGHT, color: chess.WHITE },
-  100_011: { txt: 'Q', type: chess.QUEEN, color: chess.WHITE },
-  100_001: { txt: 'K', type: chess.KING, color: chess.WHITE },
+  110: { txt: 'p', type: PAWN, color: BLACK },
+  10_110: { txt: 'r', type: ROOK, color: BLACK },
+  10_100: { txt: 'b', type: BISHOP, color: BLACK },
+  10_010: { txt: 'n', type: KNIGHT, color: BLACK },
+  100_010: { txt: 'q', type: QUEEN, color: BLACK },
+  100_000: { txt: 'k', type: KING, color: BLACK },
+  111: { txt: 'P', type: PAWN, color: WHITE },
+  10_111: { txt: 'R', type: ROOK, color: WHITE },
+  10_101: { txt: 'B', type: BISHOP, color: WHITE },
+  10_011: { txt: 'N', type: KNIGHT, color: WHITE },
+  100_011: { txt: 'Q', type: QUEEN, color: WHITE },
+  100_001: { txt: 'K', type: KING, color: WHITE },
 }
 
 export const flip_ep_column = [0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x00]
@@ -66,6 +65,6 @@ export const en_passant_encoding_black = [
 
 export const ep_mask = Number.parseInt('11100000', 2)
 export const castle_mask = Number.parseInt('00011110', 2)
-export const po = 0x1F
+export const po = 0x1f
 export const ep = 0x20
 export const ca = 0x40

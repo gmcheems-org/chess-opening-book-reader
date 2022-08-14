@@ -5,8 +5,8 @@ import {
   en_passant_encoding,
   en_passant_encoding_black,
 } from './encoding.js'
+import { key_from_fen } from '../../utils.js'
 
-import utils from '../../utils.js'
 class CTGEntry {
   constructor(to_move) {
     this.to_move = to_move || 'w'
@@ -51,7 +51,7 @@ class CTGEntry {
       fen = fen_items.join(' ')
     }
     this._fen = fen
-    this.key = utils.key_from_fen(fen)
+    this.key = key_from_fen(fen)
   }
   get fen() {
     return this._fen
