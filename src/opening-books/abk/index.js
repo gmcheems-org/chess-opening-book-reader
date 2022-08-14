@@ -23,7 +23,7 @@ class ABKParser extends EventEmitter {
   }
 
   parse(buffer) {
-    this.received_bytes += buffer.length
+    this.received_bytes += buffer.byteLength
     if (this.received_bytes > this.start + ENTRY_SIZE) {
       this.read_to_start = true
     }
@@ -70,7 +70,7 @@ class ABKParser extends EventEmitter {
     entry.entry_num = this.entry_num
     this.emit('data', entry)
     this.can_read =
-      buffer.length > START_ADDRESS + ENTRY_SIZE + offset + ENTRY_SIZE
+      buffer.byteLength > START_ADDRESS + ENTRY_SIZE + offset + ENTRY_SIZE
   }
 }
 

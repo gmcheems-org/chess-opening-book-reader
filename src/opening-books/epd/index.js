@@ -4,7 +4,7 @@ import { key_from_fen } from '../../utils.js'
 
 class EPDParser extends EventEmitter {
   parse(buffer) {
-    let data = buffer.toString()
+    let data = new TextDecoder().decode(buffer)
     let lines = data.split(/\n/m)
     this.processLines(lines)
     this.emit('finish')

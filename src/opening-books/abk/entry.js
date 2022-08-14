@@ -44,17 +44,18 @@ class ABKEntry {
   //   } *book;
   static fromBuffer(buffer, address /*, parent*/) {
     let entry = new ABKEntry()
+    let view = new DataView(buffer)
     entry.address = address
-    entry.move_from = decode_move(buffer.readInt8(0))
-    entry.move_to = decode_move(buffer.readInt8(1))
-    entry.move_promo = buffer.readInt8(2)
-    entry.priority = buffer.readInt8(3)
-    entry.games = buffer.readUInt32LE(4)
-    entry.won_games = buffer.readUInt32LE(8)
-    entry.lost_games = buffer.readUInt32LE(12)
-    entry.ply_count = buffer.readUInt32LE(16)
-    entry.first_child = buffer.readInt32LE(20)
-    entry.next_sibling = buffer.readInt32LE(24)
+    entry.move_from = decode_move(view.getInt8(0))
+    entry.move_to = decode_move(view.getInt8(1))
+    entry.move_promo = view.getInt8(2)
+    entry.priority = view.getInt8(3)
+    entry.games = view.getUint32(4, true)
+    entry.won_games = view.getUint32(8, true)
+    entry.lost_games = view.getUint32(12, true)
+    entry.ply_count = view.getUint32(16, true)
+    entry.first_child = view.getInt32(20, true)
+    entry.next_sibling = view.getInt32(24, true)
     return entry
   }
   constructor() {

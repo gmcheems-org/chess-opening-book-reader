@@ -10,8 +10,8 @@ class PolyglotParser extends EventEmitter {
   }
 
   parse(buffer) {
-    for (let index = 16; index < buffer.length; index = index + 16) {
-      let b = buffer.buffer.slice(index - 16, index)
+    for (let index = 16; index < buffer.byteLength; index = index + 16) {
+      let b = buffer.slice(index - 16, index)
       let entry = PolyglotEntry.fromBuffer(b)
       this.emit('data', entry)
     }
