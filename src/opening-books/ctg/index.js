@@ -1,10 +1,10 @@
-import EventEmitter from 'events'
 import { Chess } from 'chess.js'
 
+import BaseBook from '../base.js'
 import {
   board,
   pad_number_string,
-  debug_buffer_to_string,
+  // debug_buffer_to_string,
   key_from_fen,
 } from '../../utils.js'
 import {
@@ -33,14 +33,19 @@ function read_24(dataview, start) {
   return (byte1 << 16) + (byte2 << 8) + byte3
 }
 
-// Based on notes from http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
-class CTGParser extends EventEmitter {
-  constructor() {
-    super()
-    this.data = undefined
+function add_to_hash(keyMap, newEntries) {
+  for (const entry of newEntries) {
+    if (keyMap[entry.key]) {
+      keyMap[entry.key].push(entry)
+    } else {
+      keyMap[entry.key] = [entry]
+    }
   }
+}
 
-  parse(buffer) {
+// Based on notes from http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
+class CTGParser {
+  parse(buffer, entryKeyMap) {
     let remainder = buffer.byteLength % 4096
     if (remainder > 0 && buffer.byteLength < 4096) {
       throw new Error('Invalid CTG File (file not a factor of 4096)')
@@ -55,14 +60,23 @@ class CTGParser extends EventEmitter {
     let dataview = new DataView(newBuffer)
     let number_pages = Number.parseInt(newBuffer.byteLength / 4096)
 
+    const entries = { w: [], b: [] }
+
     for (let page_number = 0; page_number < number_pages; page_number++) {
-      this.process_page(newBuffer, page_number, dataview)
+      const newEntries = this.process_page(newBuffer, page_number, dataview)
+
+      add_to_hash(entryKeyMap.w, newEntries.w)
+      add_to_hash(entryKeyMap.b, newEntries.b)
+
+      entries.w = entries.w.concat(newEntries.w)
+      entries.b = entries.b.concat(newEntries.b)
     }
 
-    this.emit('finish')
+    return entries
   }
 
   process_page(buffer, page_number, dataView) {
+    const entries = { w: [], b: [] }
     let page_start = page_number * 4096
     let number_of_positions = dataView.getUint16(page_start)
     let bytes_in_page = dataView.getUint16(page_start + 2)
@@ -75,8 +89,16 @@ class CTGParser extends EventEmitter {
     this.record_start = 4
     this.last_record_start = 4
     for (let pos = 0; pos < number_of_positions; pos++) {
-      this.process_entry(pos, page_number, page, pageView)
+      const [entry, entry_black] = this.process_entry(
+        pos,
+        page_number,
+        page,
+        pageView,
+      )
+      entries.w.push(entry)
+      entries.b.push(entry_black)
     }
+    return entries
   }
 
   process_entry(pos, page_number, page, pageView) {
@@ -93,15 +115,15 @@ class CTGParser extends EventEmitter {
     entry_black.pos = pos
     this.last_record_start = this.record_start
     let header_byte = pageView.getUint8(this.record_start)
-    let position_length = header_byte & 0x1F
+    let position_length = header_byte & 0x1f
     let en_passant = header_byte & 0x20
     let castling = header_byte & 0x40
 
     // Could happen if loading wrong file type
     if (!header_byte) {
-      debug_buffer_to_string(
-        page.slice(this.record_start - 3, this.record_start + 3),
-      )
+      // debug_buffer_to_string(
+      //   page.slice(this.record_start - 3, this.record_start + 3),
+      // )
       throw new Error('Invalid header byte')
     }
 
@@ -300,39 +322,22 @@ class CTGParser extends EventEmitter {
     entry.record_offset = record_offset
     entry_black.record_offset = record_offset
     // console.log(entry.record_start, entry.record_offset);
-    this.emit('data', entry)
-    this.emit('data', entry_black)
+    return [entry, entry_black]
   }
 }
 
-export default class CTG extends EventEmitter {
+export default class CTG extends BaseBook {
   constructor() {
     super()
     this.loaded = false
-    this.entries = {
-      b: {},
-      w: {},
-    }
+    this.entries = []
+    this.entryKeyMap = { w: {}, b: {} }
   }
 
-  load_book(buffer) {
-    const parser = new CTGParser()
-    parser.on('data', (entry) => {
-      if (this.entries[entry.to_move][entry.key]) {
-        console.log('possible duplicate for entry')
-        console.log('New Entry:', JSON.stringify(entry, undefined, ' '))
-        console.log(
-          'OLD ENTRY:',
-          JSON.stringify(this.entries[entry.to_move][entry.key]),
-        )
-      }
-      this.entries[entry.to_move][entry.key] = entry
-    })
-    parser.on('finish', () => {
-      this.loaded = true
-      this.emit('loaded')
-    })
-    parser.parse(buffer)
+  loadBook(buffer) {
+    this.entries = new CTGParser().parse(buffer, this.entryKeyMap)
+    this.loaded = true
+    return this
   }
 
   find(fen) {
@@ -341,6 +346,6 @@ export default class CTG extends EventEmitter {
     }
     let to_move = fen.split(' ')[1]
     let key = key_from_fen(fen)
-    return this.entries[to_move][key]
+    return this.entryKeyMap[to_move]?.[key]
   }
 }

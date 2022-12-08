@@ -1,16 +1,15 @@
 //see https://chessprogramming.wikispaces.com/ABK
 //http://www.talkchess.com/forum/viewtopic.php?topic_view=threads&p=184321&t=20661
 import { key_from_fen } from '../../utils.js'
-import EventEmitter from 'events'
 
 const ENTRY_SIZE = 28 //bytes
 const START_ADDRESS = ENTRY_SIZE * 900
 
 import ABKEntry from './entry.js'
+import BaseBook from '../base.js'
 
-class ABKParser extends EventEmitter {
+class ABKParser {
   constructor() {
-    super()
     this.data = undefined
     this.start = 900 * ENTRY_SIZE
     this.entry_num = 0
@@ -23,18 +22,21 @@ class ABKParser extends EventEmitter {
   }
 
   parse(buffer) {
+    const entries = []
     this.received_bytes += buffer.byteLength
     if (this.received_bytes > this.start + ENTRY_SIZE) {
       this.read_to_start = true
     }
 
-    if (this.read_to_start) {
-      while (this.can_read) {
-        this.read_record(buffer)
-      }
+    if (!this.read_to_start) {
+      throw new Error('Invalid ABK file (file too small)')
     }
 
-    this.emit('finish')
+    while (this.can_read) {
+      entries.push(this.read_record(buffer))
+    }
+
+    return entries
   }
 
   read_record(buffer) {
@@ -68,35 +70,23 @@ class ABKParser extends EventEmitter {
     }
     this.entry_num++
     entry.entry_num = this.entry_num
-    this.emit('data', entry)
     this.can_read =
       buffer.byteLength > START_ADDRESS + ENTRY_SIZE + offset + ENTRY_SIZE
+    return entry
   }
 }
 
-class ABK extends EventEmitter {
+class ABK extends BaseBook {
   constructor() {
     super()
     this.loaded = false
     this.entries = {}
   }
 
-  load_book(buffer) {
-    const parser = new ABKParser()
-    parser.on('data', (entry) => {
-      let key = key_from_fen(entry.fen)
-      console.log('abc fen', entry.fen)
-      if (this.entries[key]) {
-        this.entries[key].push(entry)
-      } else {
-        this.entries[key] = [entry]
-      }
-    })
-    parser.on('finish', () => {
-      this.loaded = true
-      this.emit('loaded')
-    })
-    parser.parse(buffer)
+  loadBook(buffer) {
+    this.entries = new ABKParser().parse(buffer)
+    this.loaded = true
+    return this
   }
 
   find(fen) {

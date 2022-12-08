@@ -1,5 +1,6 @@
 import EventEmitter from 'events'
-import Opening from './entry.js'
+import CTGEntry from './entry.js'
+import BaseBook from '../base.js'
 
 function extract_value(text) {
   let match = text.match(/"(.+)"/)
@@ -42,7 +43,7 @@ class ECOParser extends EventEmitter {
           this.current_record.pgn = this.current_record.pgn.trim()
           this.emit('data', this.current_record)
         }
-        this.current_record = new Opening()
+        this.current_record = new CTGEntry()
         this.current_record.eco_code = extract_value(line)
       } else if (line.startsWith('[Opening')) {
         this.current_record.name = extract_value(line)
@@ -60,14 +61,14 @@ class ECOParser extends EventEmitter {
   }
 }
 
-export default class Eco extends EventEmitter {
+export default class Eco extends BaseBook {
   constructor() {
     super()
     this.loaded = false
     this.comment = ''
     this.entries = []
   }
-  load_book(buffer) {
+  loadBook(buffer) {
     const parser = new ECOParser()
     parser.on('finish', () => {
       this.loaded = true

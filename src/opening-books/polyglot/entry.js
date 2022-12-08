@@ -19,6 +19,11 @@ class PolyglotEntry {
     entry._algebraic_move = decode_move(dataView.getUint16(8, false))
     entry._weight = dataView.getUint16(10, false)
     entry._learn = dataView.getUint32(12, false)
+
+    if (!entry._weight || entry._key === '0000000000000000') {
+      throw new Error('Invalid Polyglot file')
+    }
+
     return entry
   }
 

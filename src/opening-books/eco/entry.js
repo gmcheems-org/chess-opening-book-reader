@@ -1,6 +1,6 @@
 import { Chess } from 'chess.js'
 
-export default class Opening {
+export default class CTGEntry {
   constructor() {
     this.eco_code = ''
     this.variation = ''

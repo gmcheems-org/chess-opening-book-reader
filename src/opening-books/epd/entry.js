@@ -76,8 +76,16 @@ class EPDEntry {
     let fen = fen_elements.slice(0, 4).join(' ')
     position.fen = fen + ' 0 1'
     elements[0] = fen_elements.slice(4).join(' ')
+
+    // eslint-disable-next-line unicorn/better-regex
+    if (!/(\/?[pnbrqkPNBRQK1-8]+){1,8}/.test(fen)) {
+      throw new Error('Invalid EPD file (fen invalid)')
+    }
+
     for (let element of elements) {
       let em = element.trim().match(/(\w+)\s+(.+)/)
+      if (!em?.length) continue
+
       let command = em[1]
       let value = em[2]
       if (command === 'id') {
@@ -88,8 +96,7 @@ class EPDEntry {
       } else if (OPCODES[command]) {
         position.operations[command] = OPCODES[command](value)
       } else {
-        console.log('Invalid command', command)
-        console.log('Value is', value)
+        throw new Error('Invalid command: ' + command)
       }
     }
     return position

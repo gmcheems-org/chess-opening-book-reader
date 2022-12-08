@@ -56,6 +56,11 @@ class ABKEntry {
     entry.ply_count = view.getUint32(16, true)
     entry.first_child = view.getInt32(20, true)
     entry.next_sibling = view.getInt32(24, true)
+
+    if (entry.first_child < 900 && entry.first_child !== -1) {
+      throw new Error('Invalid ABK File (invalid first child)')
+    }
+
     return entry
   }
   constructor() {
