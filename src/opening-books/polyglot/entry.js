@@ -1,10 +1,11 @@
 import { encode_move, decode_move } from './encoding.js'
 
 import pkg from 'int64-buffer'
-import { fen_hash } from './tools.js'
+import { polyglot_fen_hash } from './tools.js'
+import { BaseEntry } from '../base.js'
 const { Uint64BE } = pkg
 
-class PolyglotEntry {
+class PolyglotEntry extends BaseEntry {
   static fromBuffer(buffer) {
     let dataView = new DataView(buffer)
     let entry = new PolyglotEntry()
@@ -20,8 +21,9 @@ class PolyglotEntry {
     entry._weight = dataView.getUint16(10, false)
     entry._learn = dataView.getUint32(12, false)
 
+    // Books can have invalid entries, so don't throw just return empty null
     if (!entry._weight || entry._key === '0000000000000000') {
-      throw new Error('Invalid Polyglot file')
+      return
     }
 
     return entry
@@ -29,13 +31,19 @@ class PolyglotEntry {
 
   static withFEN(fen, algebraic_move, weight, learn) {
     let entry = new PolyglotEntry()
-    entry._key = fen_hash(fen)
+    entry._key = polyglot_fen_hash(fen)
     entry.algebraic_move = algebraic_move
     entry.weight = weight
     entry.learn = learn
   }
 
-  constructor() {}
+  constructor() {
+    super()
+  }
+
+  get type() {
+    return 'polyglot'
+  }
 
   get key() {
     return this._key
@@ -65,7 +73,7 @@ class PolyglotEntry {
   toJSON() {
     return {
       key: this._key,
-      aglebraic_move: this._aglebraic_move,
+      algebraic_move: this._algebraic_move,
       encoded_move: this._encoded_move,
       weight: this._weight,
       learn: this._learn,

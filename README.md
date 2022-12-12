@@ -13,8 +13,15 @@ npm install chess-opening-book-reader
 ```js
 const buffer = somethingThatReturnsArrayBuffer()
 import { OpeningBooks } from 'chess-opening-book-reader'
-book = new OpeningBooks.CTG().loadBook(buffer)
-book.find(someFen)
+let parser = new OpeningBooks.CTG.CTGParser()
+parser.on('batch', (batch) => {
+  // process batch of entries
+  // e.g. index them somewhere
+})
+parser.on('progress', (percentage) => {
+  // show percentage in UI
+})
+await parser.parse(buffer)
 ```
 
 ## Supported Formats:
@@ -39,7 +46,8 @@ Note: Sample Files are believed to be in the public domain or licensed under GPL
   - Sample File https://github.com/michaeldv/donna_opening_books/raw/master/gm2001.bin
 
 - CTG Format
-  - Forum post .. http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
+  - Forum post http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
+  - Archive https://web.archive.org/web/20210129162445/http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
 
 - CTGReader
   - https://github.com/sshivaji/ctgreader/

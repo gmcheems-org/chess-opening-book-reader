@@ -8,3 +8,9 @@ export default class BaseBook extends EventEmitter {
     throw new Error('find() not implemented')
   }
 }
+
+export class BaseEntry {
+  get type() {
+    throw new Error('type() not implemented')
+  }
+}

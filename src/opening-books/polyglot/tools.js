@@ -25,7 +25,7 @@ function xor_64uint(a, b) {
   return Uint64BE(n_hi, n_lo)
 }
 
-export const fen_hash = (fen) => {
+export const polyglot_fen_hash = (fen) => {
   let game = new Chess(fen)
   let result = game.validate_fen(fen)
   if (!result.valid) {

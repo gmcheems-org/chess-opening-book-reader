@@ -1,6 +1,6 @@
 import { PAWN, ROOK, BISHOP, KNIGHT, QUEEN, KING, WHITE, BLACK } from 'chess.js'
 
-export const peice_encoding = {
+export const piece_encoding = {
   0: { txt: ' ', type: undefined, color: undefined },
   110: { txt: 'P', type: PAWN, color: WHITE },
   10_110: { txt: 'R', type: ROOK, color: WHITE },
@@ -16,7 +16,7 @@ export const peice_encoding = {
   100_001: { txt: 'k', type: KING, color: BLACK },
 }
 
-export const peice_encoding_black = {
+export const piece_encoding_black = {
   0: { txt: ' ', type: undefined, color: undefined },
   110: { txt: 'p', type: PAWN, color: BLACK },
   10_110: { txt: 'r', type: ROOK, color: BLACK },
@@ -65,6 +65,7 @@ export const en_passant_encoding_black = [
 
 export const ep_mask = Number.parseInt('11100000', 2)
 export const castle_mask = Number.parseInt('00011110', 2)
-export const po = 0x1F
+// eslint-disable-next-line unicorn/number-literal-case
+export const po = 0x1f
 export const ep = 0x20
 export const ca = 0x40

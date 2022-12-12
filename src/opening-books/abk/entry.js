@@ -86,7 +86,7 @@ class ABKEntry {
     // let move = { from: p.move_from, to: p.move_to, sloppy : true }
     // if (p.move_promo) {
     //     move.flags = 'p';
-    //     move.peice = p.move_promo;
+    //     move.piece = p.move_promo;
     // }
     if (this.move_promo) {
       move += this.move_promo

@@ -6,9 +6,11 @@ import {
   en_passant_encoding_black,
 } from './encoding.js'
 import { key_from_fen } from '../../utils.js'
+import { BaseEntry } from '../base.js'
 
-class CTGEntry {
+class CTGEntry extends BaseEntry {
   constructor(to_move) {
+    super()
     this.to_move = to_move || 'w'
     this.book_moves = []
     this.ratings = []
@@ -20,10 +22,7 @@ class CTGEntry {
     this.unknown2
     this.is_mirrored = false
   }
-  toChess() {
-    let chess = new Chess(this.fen)
-    return chess
-  }
+
   setFen(fen) {
     if (this.has_castling) {
       let castle_string = ''
@@ -53,12 +52,24 @@ class CTGEntry {
     this._fen = fen
     this.key = key_from_fen(fen)
   }
+
+  get type() {
+    return 'ctg'
+  }
+
   get fen() {
     return this._fen
   }
+
   toPGN() {
     throw new Error('PGN not available')
   }
+
+  toChess() {
+    let chess = new Chess(this.fen)
+    return chess
+  }
+
   toString() {
     return JSON.stringify(this, undefined, '')
   }
