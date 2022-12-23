@@ -49,16 +49,12 @@ class CTGEntry extends BaseEntry {
       fen_items[1] = 'b'
       fen = fen_items.join(' ')
     }
-    this._fen = fen
+    this.fen = fen
     this.key = key_from_fen(fen)
   }
 
   get type() {
     return 'ctg'
-  }
-
-  get fen() {
-    return this._fen
   }
 
   toPGN() {

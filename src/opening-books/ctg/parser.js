@@ -110,16 +110,10 @@ export class CTGParser extends EventEmitter {
       )
 
       if (entry.book_moves.length > 0) {
-        batchEntries.push({
-          key: entry.key,
-          book_moves: entry.book_moves,
-        })
+        batchEntries.push(entry)
       }
       if (entry_black.book_moves.length > 0) {
-        batchEntries.push({
-          key: entry_black.key,
-          book_moves: entry_black.book_moves,
-        })
+        batchEntries.push(entry_black)
       }
     }
   }
@@ -290,8 +284,14 @@ export class CTGParser extends EventEmitter {
         'b',
         black_is_mirrored,
       )
-      entry.book_moves.push(move_and_analysis)
-      entry_black.book_moves.push(move_and_analysis_black)
+
+      // Only add the moves if they are not null
+      if (move_and_analysis) {
+        entry.book_moves.push(move_and_analysis)
+      }
+      if (move_and_analysis_black) {
+        entry_black.book_moves.push(move_and_analysis_black)
+      }
     }
     this.record_start += book_moves_size
     let number_games = read_24(pageView, this.record_start)
