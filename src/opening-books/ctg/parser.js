@@ -35,7 +35,17 @@ function read_24(dataview, start) {
 // Based on notes from http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
 // https://web.archive.org/web/20210129162445/http://rybkaforum.net/cgi-bin/rybkaforum/topic_show.pl?tid=2319
 export class CTGParser extends EventEmitter {
+  stopProcessing = false
+
+  constructor() {
+    super()
+    this.on('stop', () => {
+      this.stopProcessing = true
+    })
+  }
+
   async parse({ buffer, wait = true }) {
+    this.stopProcessing = false
     let remainder = buffer.byteLength % 4096
     if (remainder > 0 && buffer.byteLength < 4096) {
       throw new Error('Invalid CTG File (file not a factor of 4096)')
@@ -61,19 +71,25 @@ export class CTGParser extends EventEmitter {
 
     // start at page 1 to discard first 4096 bytes as it only contains metadata
     for (let page_number = 1; page_number < number_pages; page_number++) {
+      if (this.stopProcessing) {
+        break
+      }
       this.process_page(buffer, page_number, dataview, batchEntries)
 
       if (batchEntries.length >= batchSize) {
         this.emit('batch', batchEntries)
         this.emit('progress', page_number / number_pages)
         batchEntries = []
+
         if (wait) {
           await new Promise((r) => setTimeout(r, waitTime))
         }
       }
     }
 
-    this.emit('batch', batchEntries)
+    if (batchEntries.length > 0) {
+      this.emit('batch', batchEntries)
+    }
   }
 
   process_page(buffer, page_number, dataView, batchEntries) {
