@@ -28,6 +28,8 @@ function xy_to_algebraic_notation(xy) {
 
 class CTGMoveService {
   constructor() {}
+
+  // Returning nothing means the move is invalid for the current parameters
   decode_move(code, analysis_code, board, is_black, is_mirrored) {
     let move
     let start_position = ''
@@ -86,6 +88,10 @@ class CTGMoveService {
                 let xy = algebraic_position_to_xy(start_position)
                 xy.y = xy.y + y
                 xy.x = xy.x + x
+                if (xy.y < 0 || xy.x < 0) {
+                  return
+                }
+
                 move_notation =
                   start_position + '' + xy_to_algebraic_notation(xy)
               }
@@ -99,6 +105,7 @@ class CTGMoveService {
         }
       }
     }
+
     return {
       move: move,
       analysis: this.decode_analysis(analysis_code),
