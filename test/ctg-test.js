@@ -1,39 +1,40 @@
-import { OpeningBooks } from '../index.js'
+import { expect } from 'chai'
 import fs from 'node:fs'
-import assert from 'node:assert'
 import path from 'node:path'
 import { fileURLToPath } from 'url'
+
+import { key_from_fen, OpeningBooks } from '../index.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const test_fen = [
-  'rnbqkbnr/pppp1ppp/8/4p3/8/8/PPPPPPPP/RNBQKBNR w KQkq',
-  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq',
-  'rnbqkbnr/ppp1pppp/8/3p4/8/8/PPPPPPPP/RNBQKBNR w KQkq',
-  'rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq',
+  'rnbqkbnr/pppp1ppp/8/4p3/8/8/PPPPPPPP/RNBQKBNR w KQkq -',
+  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -',
+  'rnbqkbnr/ppp1pppp/8/3p4/8/8/PPPPPPPP/RNBQKBNR w KQkq -',
+  'rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq -',
 ]
-describe.skip('CTG', function () {
-  let ctg = new OpeningBooks.CTG.CTGParser()
-  before(function (done) {
-    ctg.on('loaded', () => {
-      done()
+
+describe('CTG', function () {
+  let parser = new OpeningBooks.CTG.CTGParser()
+  let allEntries = []
+  before(async function () {
+    parser.on('batch', (batch) => {
+      allEntries.push(...batch)
     })
-    ctg.load_book(fs.createReadStream(__dirname + '/sample-data/simple.ctg'))
+    await parser.parse({
+      buffer: fs.readFileSync(__dirname + '/sample-data/simple.ctg').buffer,
+    })
   })
   describe('check loaded', function () {
-    it('loaded is true', function () {
-      assert.equal(ctg.loaded, true)
-    })
     it('has entries', function () {
-      assert.equal(Object.keys(ctg.entries.b).length, 4)
+      expect(allEntries.length).to.eq(8)
     })
   })
   describe('check move lookup', function () {
     for (const fen of test_fen) {
       it(fen + ' has data', function () {
-        // let r = ctg.find(fen)
-        // console.log(JSON.stringify(r.book_moves,undefined, ' '));
-        assert.notEqual(typeof r, 'undefined')
+        let r = allEntries.find((entry) => entry.key === key_from_fen(fen))
+        expect(r).not.to.be.undefined
       })
     }
   })

@@ -44,5 +44,3 @@ export class PolyglotParser extends EventEmitter {
     }
   }
 }
-
-export { polyglot_fen_hash } from './tools.js'

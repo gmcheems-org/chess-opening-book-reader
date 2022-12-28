@@ -109,12 +109,7 @@ export class CTGParser extends EventEmitter {
         pageView,
       )
 
-      if (entry.book_moves.length > 0) {
-        batchEntries.push(entry)
-      }
-      if (entry_black.book_moves.length > 0) {
-        batchEntries.push(entry_black)
-      }
+      batchEntries.push(entry, entry_black)
     }
   }
 
