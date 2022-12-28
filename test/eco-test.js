@@ -6,7 +6,7 @@ import ECO from '../src/opening-books/eco/index.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-describe('ECO', function () {
+describe.skip('ECO', function () {
   let eco
   before(function (done) {
     eco = new ECO()

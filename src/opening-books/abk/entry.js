@@ -14,16 +14,21 @@ function decode_promotion(promotion) {
     return ''
   }
   switch (promotion) {
-    case 1:
+    case 1: {
       return 'r'
-    case 2:
+    }
+    case 2: {
       return 'n'
-    case 3:
+    }
+    case 3: {
       return 'b'
-    case 4:
+    }
+    case 4: {
       return 'q'
-    default:
+    }
+    default: {
       return false
+    }
   }
 }
 

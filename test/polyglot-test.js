@@ -1,8 +1,10 @@
-import Polyglot from '../src/opening-books/polyglot/index.js'
+import { expect } from 'chai'
 import fs from 'node:fs'
-import assert from 'node:assert'
 import path from 'node:path'
 import { fileURLToPath } from 'url'
+
+import { OpeningBooks } from '../index.js'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const test_data = {
@@ -21,21 +23,19 @@ const test_data = {
 }
 
 describe('Polyglot', function () {
-  let polyglot = new Polyglot()
-  before(function (done) {
-    polyglot.on('loaded', () => {
-      done()
+  let parser = new OpeningBooks.Polyglot.PolyglotParser()
+  let allEntries = []
+  before(async function () {
+    parser.on('batch', (batch) => {
+      allEntries = allEntries.concat(batch)
     })
-    polyglot.load_book(
-      fs.createReadStream(__dirname + '/sample-data/gm2001.bin'),
-    )
+    await parser.parse({
+      buffer: fs.readFileSync(__dirname + '/sample-data/gm2001.bin').buffer,
+    })
   })
   describe('check loaded', function () {
-    it('loaded is true', function () {
-      assert.equal(polyglot.loaded, true)
-    })
     it('has entries', function () {
-      assert.equal(Object.keys(polyglot.entries).length, 23_807)
+      expect(allEntries.length).to.eq(30_415)
     })
   })
   describe('test hashes', function () {
@@ -47,10 +47,9 @@ describe('Polyglot', function () {
           ' should equal ' +
           test_data[name].key,
         function () {
-          assert.equal(
-            polyglot.generate_hash(test_data[name].FEN),
-            test_data[name].key,
-          )
+          expect(
+            OpeningBooks.Polyglot.polyglot_fen_hash(test_data[name].FEN),
+          ).to.eq(test_data[name].key)
         },
       )
     }
@@ -58,8 +57,12 @@ describe('Polyglot', function () {
   describe('test move lookups', function () {
     for (let name of Object.keys(test_data)) {
       it(name + ' has moves ', function () {
-        let r = polyglot.findAll(test_data[name].FEN)
-        assert.notEqual(typeof r, 'undefined')
+        let r = allEntries.find(
+          (entry) =>
+            entry._key ===
+            OpeningBooks.Polyglot.polyglot_fen_hash(test_data[name].FEN),
+        )
+        expect(typeof r).not.to.eq('undefined')
       })
     }
   })

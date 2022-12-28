@@ -10,7 +10,7 @@ let FLIP_TESTS = [
     'r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq -',
   ],
 ]
-describe('Utils', function () {
+describe.skip('Utils', function () {
   describe('check_flip_board', function () {
     it('flip basic board', function () {
       let flip = Utils.flip_board(START_FEN)
