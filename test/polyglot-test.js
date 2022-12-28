@@ -62,7 +62,7 @@ describe('Polyglot', function () {
             entry._key ===
             OpeningBooks.Polyglot.polyglot_fen_hash(test_data[name].FEN),
         )
-        expect(typeof r).not.to.eq('undefined')
+        expect(r).not.to.be.undefined
       })
     }
   })
