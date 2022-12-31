@@ -6,7 +6,8 @@
   "scripts": {
     "main": "index.js",
     "lint": "eslint src test",
-    "test": "mocha --timeout 60000 test/*"
+    "test": "mocha --timeout 60000 test/*",
+    "test:watch": "nodemon -w test/ -w src/ -x \"clear && npm run test\" "
   },
   "repository": {
     "type": "git",
@@ -50,6 +51,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-unicorn": "^45.0.2",
     "mocha": "^10.2.0",
+    "nodemon": "^2.0.20",
     "prettier": "^2.8.1"
   },
   "dependencies": {
