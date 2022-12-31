@@ -26,8 +26,10 @@ await parser.parse(buffer)
 
 ## Supported Formats:
 
-- CTG - used by products such as Chessbase
-- Polyglot - used by a number of open source projects
+- [x] CTG - used by products such as Chessbase
+- [x] Polyglot - used by a number of open source projects
+
+Todo:
 - ABK - used by products such as Arena
 - EPD
 - ECO
