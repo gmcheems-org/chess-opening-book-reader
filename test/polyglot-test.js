@@ -23,47 +23,59 @@ const test_data = {
 }
 
 describe('Polyglot', function () {
-  let parser = new OpeningBooks.Polyglot.PolyglotParser()
-  let allEntries = []
-  before(async function () {
-    parser.on('batch', (batch) => {
-      allEntries = allEntries.concat(batch)
-    })
-    await parser.parse({
-      buffer: fs.readFileSync(__dirname + '/sample-data/gm2001.bin').buffer,
-    })
-  })
-  describe('check loaded', function () {
-    it('has entries', function () {
-      expect(allEntries.length).to.eq(30_415)
+  describe('Edge case with en passant', function () {
+    it('should match key', function () {
+      expect(
+        OpeningBooks.Polyglot.polyglot_fen_hash(
+          'r1b2rk1/ppp1q1b1/5nnp/3p4/5Pp1/2P5/PP4PP/RNKQ1B1R b - f3 0 1',
+        ),
+      ).to.eq('5106414c710d4a9e')
     })
   })
-  describe('test hashes', function () {
-    for (let name of Object.keys(test_data)) {
-      it(
-        name +
-          ' ' +
-          test_data[name].FEN +
-          ' should equal ' +
-          test_data[name].key,
-        function () {
-          expect(
-            OpeningBooks.Polyglot.polyglot_fen_hash(test_data[name].FEN),
-          ).to.eq(test_data[name].key)
-        },
-      )
-    }
-  })
-  describe('test move lookups', function () {
-    for (let name of Object.keys(test_data)) {
-      it(name + ' has moves ', function () {
-        let r = allEntries.find(
-          (entry) =>
-            entry._key ===
-            OpeningBooks.Polyglot.polyglot_fen_hash(test_data[name].FEN),
-        )
-        expect(r).not.to.be.undefined
+
+  describe('gm2001.bin', function () {
+    let parser = new OpeningBooks.Polyglot.PolyglotParser()
+    let allEntries = []
+    before(async function () {
+      parser.on('batch', (batch) => {
+        allEntries = allEntries.concat(batch)
       })
-    }
+      await parser.parse({
+        buffer: fs.readFileSync(__dirname + '/sample-data/gm2001.bin').buffer,
+      })
+    })
+    describe('check loaded', function () {
+      it('has entries', function () {
+        expect(allEntries.length).to.eq(30_415)
+      })
+    })
+    describe('test hashes', function () {
+      for (let name of Object.keys(test_data)) {
+        it(
+          name +
+            ' ' +
+            test_data[name].FEN +
+            ' should equal ' +
+            test_data[name].key,
+          function () {
+            expect(
+              OpeningBooks.Polyglot.polyglot_fen_hash(test_data[name].FEN),
+            ).to.eq(test_data[name].key)
+          },
+        )
+      }
+    })
+    describe('test move lookups', function () {
+      for (let name of Object.keys(test_data)) {
+        it(name + ' has moves ', function () {
+          let r = allEntries.find(
+            (entry) =>
+              entry._key ===
+              OpeningBooks.Polyglot.polyglot_fen_hash(test_data[name].FEN),
+          )
+          expect(r).not.to.be.undefined
+        })
+      }
+    })
   })
 })

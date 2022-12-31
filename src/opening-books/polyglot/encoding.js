@@ -1,3 +1,6 @@
+// A reference for the polyglot encoding
+// http://hgm.nubati.net/book_format.html
+
 import utils from '../../utils.js'
 
 import pkg from 'int64-buffer'
@@ -805,7 +808,7 @@ const Random64Array = [
 export const Random64 = Random64Array
 export const RandomPiece = Random64.slice(0, 768)
 export const RandomCastle = Random64.slice(768, 768 + 4)
-export const RandomEnPassant = Random64.slice(764, 764 + 4)
+export const RandomEnPassant = Random64.slice(772, 772 + 8)
 export const RandomTurn = Random64.slice(780, 780 + 1)
 export const PromotionPieces = [...' nbrq']
 export const encode_move = function (/*algebraic_move*/) {}
