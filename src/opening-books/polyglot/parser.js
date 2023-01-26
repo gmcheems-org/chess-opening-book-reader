@@ -3,19 +3,24 @@ import PolyglotEntry from './entry.js'
 
 export class PolyglotParser extends EventEmitter {
   stopProcessing = false
+  waitTime = 100
+  batchSize = 1000
 
   constructor() {
     super()
     this.on('stop', () => {
       this.stopProcessing = true
     })
+    this.on('updateWaitTime', (newWait) => {
+      this.waitTime = newWait
+    })
+    this.on('updateBatchSize', (newBatch) => {
+      this.batchSize = newBatch
+    })
   }
 
   async parse({ buffer, wait = true }) {
     let batchEntries = []
-
-    let batchSize = 1000,
-      waitTime = 100
 
     for (let index = 16; index < buffer.byteLength; index = index + 16) {
       if (this.stopProcessing) {
@@ -29,12 +34,12 @@ export class PolyglotParser extends EventEmitter {
       }
       batchEntries.push(entry)
 
-      if (batchEntries.length >= batchSize) {
+      if (batchEntries.length >= this.batchSize) {
         this.emit('batch', batchEntries)
         this.emit('progress', index / buffer.byteLength)
         batchEntries = []
         if (wait) {
-          await new Promise((r) => setTimeout(r, waitTime))
+          await new Promise((r) => setTimeout(r, this.waitTime))
         }
       }
     }
